@@ -1,0 +1,18 @@
+{
+  "format_version": "1.1",
+  "package_name": "infra/tools/luci/cas/windows-amd64",
+  "version_file": ".versions/cas.exe.cipd_version",
+  "actual_install_mode": "copy",
+  "files": [
+    {
+      "name": "cas.exe",
+      "size": 26466304,
+      "hash": "5m_wb3wHHsYLx3Fkgp7kjCaTehRb3Zxs7sGaWV7CgXsC"
+    },
+    {
+      "name": ".versions/cas.exe.cipd_version",
+      "size": 123,
+      "hash": "1dSM5Fqn-JBNvd_VfH7K1NtHyn9HDVGzfyy_tNI5RygC"
+    }
+  ]
+}
