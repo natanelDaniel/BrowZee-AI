@@ -5,7 +5,6 @@
 
 ```bash
 git clone https://github.com/natanelDaniel/BrowZee-AI.git
-cd BrowZee-AI
 ```
 
 ### 2. Set up a virtual environment and install dependencies:
@@ -13,7 +12,7 @@ cd BrowZee-AI
 ```bash
 python -m venv venv
 venv\Scripts\activate  # or source venv/bin/activate (Linux/Mac)
-pip install -r requirements_clean.txt
+pip install -r requirements.txt
 ```
 
 ### 3. Build the `ai_server.exe` file using PyInstaller (Its preferable from administrator cmd):
