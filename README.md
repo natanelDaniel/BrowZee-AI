@@ -39,8 +39,9 @@ dist/ai_server.exe
 ### 4. Build the customized Chromium browser
 
 #### Step A: Generate build files with GN (first time only - can take up to a day):
-
+open a cmd on your src folder
 ```bash
+$env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
 gn gen out/Default
 ```
 
