@@ -1,6 +1,4 @@
 
-// -------------------- README for Developers --------------------
-
 ## 🧑‍💻 BrowZee AI - Developer Setup Guide
 
 ### 1. Clone the repository:
