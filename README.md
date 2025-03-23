@@ -5,7 +5,7 @@
 
 ```bash
 git clone https://github.com/natanelDaniel/BrowZee-AI.git
-cd browzee-ai-browser
+cd BrowZee-AI
 ```
 
 ### 2. Set up a virtual environment and install dependencies:
