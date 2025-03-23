@@ -43,7 +43,20 @@ on cmd:
 ```bash
 git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 ```
+Add Depot Tools to PATH
+Once you've downloaded Depot Tools, you'll need to add it to your system's PATH so that you can run commands like gclient from anywhere.
 
+Find the location where you cloned Depot Tools (e.g., C:\path\to\depot_tools)
+
+Right-click on "This PC" or "Computer" and select "Properties"
+
+Click on "Advanced system settings" on the left
+
+Click on the "Environment Variables" button
+
+Under "System variables", find the "Path" variable and select "Edit"
+
+Add the path to the Depot Tools directory (e.g., C:\path\to\depot_tools) to the list
 open a powershall on your src folder
 ```bash
 $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
