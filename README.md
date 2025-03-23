@@ -13,7 +13,7 @@ cd BrowZee-AI
 ```bash
 python -m venv venv
 venv\Scripts\activate  # or source venv/bin/activate (Linux/Mac)
-pip install -r requirements_clean.txt
+pip install -r requirements.txt
 ```
 
 ### 3. Build the `ai_server.exe` file using PyInstaller (Its preferable from administrator cmd):
@@ -39,7 +39,12 @@ dist/ai_server.exe
 ### 4. Build the customized Chromium browser
 
 #### Step A: Generate build files with GN (first time only - can take up to a day):
-open a cmd on your src folder
+on cmd:
+```bash
+git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+```
+
+open a powershall on your src folder
 ```bash
 $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
 gclient runhooks
