@@ -61,8 +61,12 @@ open a powershall on your src folder
 ```bash
 $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
 fetch chromium
+```
+```bash
+cd ..
 powershell -ExecutionPolicy Bypass -File .\update_src.ps1
 gclient runhooks
+cd src
 gn gen out/Default
 ```
 
