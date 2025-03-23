@@ -61,6 +61,7 @@ open a powershall on your src folder
 ```bash
 $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
 gclient runhooks
+fetch chromium
 gn gen out/Default
 ```
 
