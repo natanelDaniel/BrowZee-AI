@@ -60,8 +60,9 @@ Add the path to the Depot Tools directory (e.g., C:\path\to\depot_tools) to the 
 open a powershall on your src folder
 ```bash
 $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
-gclient runhooks
 fetch chromium
+gclient runhooks
+update_src.bat
 gn gen out/Default
 ```
 
