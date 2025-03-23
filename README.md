@@ -42,6 +42,7 @@ dist/ai_server.exe
 open a cmd on your src folder
 ```bash
 $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
+gclient runhooks
 gn gen out/Default
 ```
 
