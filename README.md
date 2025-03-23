@@ -16,7 +16,7 @@ venv\Scripts\activate  # or source venv/bin/activate (Linux/Mac)
 pip install -r requirements_clean.txt
 ```
 
-### 3. Build the `ai_server.exe` file using PyInstaller:
+### 3. Build the `ai_server.exe` file using PyInstaller (Its preferable from administrator cmd):
 
 ```bash
 pyinstaller ^
@@ -36,13 +36,7 @@ Output binary will be located at:
 dist/ai_server.exe
 ```
 
-### 4. Start the AI server manually:
-
-```bash
-dist/ai_server.exe
-```
-
-### 5. Build the customized Chromium browser
+### 4. Build the customized Chromium browser
 
 #### Step A: Generate build files with GN (first time only - can take up to a day):
 
@@ -71,6 +65,11 @@ Then run:
 
 ## 🧪 Testing the Browser
 
+Start the AI server manually:
+
+```bash
+dist/ai_server.exe
+```
 Simply launch:
 
 ```bash
