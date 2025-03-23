@@ -4,8 +4,8 @@
 ### 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-user/browzee-ai-browser.git
-cd browzee-ai-browser
+git clone https://github.com/natanelDaniel/BrowZee-AI.git
+cd BrowZee-AI
 ```
 
 ### 2. Set up a virtual environment and install dependencies:
@@ -13,7 +13,7 @@ cd browzee-ai-browser
 ```bash
 python -m venv venv
 venv\Scripts\activate  # or source venv/bin/activate (Linux/Mac)
-pip install -r requirements_clean.txt
+pip install -r requirements.txt
 ```
 
 ### 3. Build the `ai_server.exe` file using PyInstaller (Its preferable from administrator cmd):
@@ -39,9 +39,28 @@ dist/ai_server.exe
 ### 4. Build the customized Chromium browser
 
 #### Step A: Generate build files with GN (first time only - can take up to a day):
-open a cmd on your src folder
+on cmd:
+```bash
+git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+```
+Add Depot Tools to PATH
+Once you've downloaded Depot Tools, you'll need to add it to your system's PATH so that you can run commands like gclient from anywhere.
+
+Find the location where you cloned Depot Tools (e.g., C:\path\to\depot_tools)
+
+Right-click on "This PC" or "Computer" and select "Properties"
+
+Click on "Advanced system settings" on the left
+
+Click on the "Environment Variables" button
+
+Under "System variables", find the "Path" variable and select "Edit"
+
+Add the path to the Depot Tools directory (e.g., C:\path\to\depot_tools) to the list
+open a powershall on your src folder
 ```bash
 $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
+gclient runhooks
 gn gen out/Default
 ```
 
