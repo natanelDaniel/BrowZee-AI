@@ -26,7 +26,7 @@ pyinstaller ^
   --uac-admin ^
   --add-data "venv/Lib/site-packages/browser_use/agent/system_prompt.md;browser_use/agent" ^
   --add-data "venv/Lib/site-packages/browser_use/dom/buildDomTree.js;browser_use/dom" ^
-  AI_Agent/ai_server.py
+  ai_server.py
 ```
 
 Output binary will be located at:
