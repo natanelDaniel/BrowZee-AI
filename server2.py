@@ -53,7 +53,6 @@ def root():
 
 @app.websocket("/ws/status")
 async def websocket_status(websocket):
-    print(1)
     await websocket_endpoint(websocket)
 
 @app.post("/stop-task")
@@ -64,6 +63,26 @@ async def stop_task():
         await send_to_websockets("🛑 Task stopped by user.")
         active_agent = None
         return {"status": "stopped"}
+    return {"status": "no_active_task"}
+
+@app.post("pause-task")
+async def pause_task():
+    global active_agent
+    if active_agent is not None:
+        active_agent.pause()
+        active_agent.state.paused = True
+        await send_to_websockets("⏸ Task paused by user.")
+        return {"status": "paused"}
+    return {"status": "no_active_task"}
+
+@app.post("resume-task")
+async def resume_task():
+    global active_agent
+    if active_agent is not None:
+        active_agent.resume()
+        active_agent.state.paused = False
+        await send_to_websockets("▶ Task resumed by user.")
+        return {"status": "resumed"}
     return {"status": "no_active_task"}
 
 @app.post("/run-task")
@@ -110,7 +129,7 @@ async def run_task(request: TaskRequest):
         await send_to_websockets(answer.content)
         return answer
 
-    elif mode == "task":
+    elif mode == "task" or mode == "interactive-task":
         global active_agent
         if active_agent is not None:
             return
@@ -120,11 +139,15 @@ async def run_task(request: TaskRequest):
         config = BrowserConfig(chrome_instance_path=chrome_path)
         browser = Browser(config=config)
 
+        if mode == "interactive-task":
+            interactive = True
+        else:
+            interactive = False
         active_agent = Agent(
             browser=browser,
             task=task_text,
             llm=ChatOpenAI(model="gpt-4o"),
-            send_to_websockets_flag=True
+            send_to_websockets_flag=True, interactive=interactive
         )
         agent_result = await active_agent.run_interactive()
         result = agent_result.final_result()

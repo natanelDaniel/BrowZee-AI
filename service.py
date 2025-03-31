@@ -100,12 +100,9 @@ websockets = []
 @app.websocket("/ws/status")
 async def websocket_endpoint(websocket: WebSocket):
     global websocket_connection
-    print(2)
     await websocket.accept()
     websocket_connection = websocket
-    print(3)
     websockets.append(websocket)  # ← הוספת החיבור לרשימה
-    print(4)
     try:
         while True:
             data = await websocket.receive_text()
@@ -123,8 +120,8 @@ async def send_to_websockets(message: str):
     for ws in websockets:
         await ws.send_text(message)
 
-
-def log_response(response: AgentOutput) -> None:
+@time_execution_async('--step (agent)')
+async def log_response(response: AgentOutput) -> None:
 	"""Utility function to log the model's response."""
 
 	if 'Success' in response.current_state.evaluation_previous_goal:
@@ -135,8 +132,14 @@ def log_response(response: AgentOutput) -> None:
 		emoji = '🤷'
 
 	logger.info(f'{emoji} Eval: {response.current_state.evaluation_previous_goal}')
+	if self.send_to_websockets_flag:
+		await send_to_websockets(f'{emoji} Eval: {response.current_state.evaluation_previous_goal}')
 	logger.info(f'🧠 Memory: {response.current_state.memory}')
+	if self.send_to_websockets_flag:
+		await send_to_websockets(f'🧠 Memory: {response.current_state.memory}')
 	logger.info(f'🎯 Next goal: {response.current_state.next_goal}')
+	if self.send_to_websockets_flag:
+		await send_to_websockets(f'🎯 Next goal: {response.current_state.next_goal}')
 	for i, action in enumerate(response.action):
 		logger.info(f'🛠️  Action {i + 1}/{len(response.action)}: {action.model_dump_json(exclude_unset=True)}')
 
@@ -200,6 +203,7 @@ class Agent(Generic[Context]):
 		#
 		context: Context | None = None,
 		send_to_websockets_flag: bool = False,
+		interactive: bool = False,
 	):
 		if page_extraction_llm is None:
 			page_extraction_llm = llm
@@ -209,7 +213,7 @@ class Agent(Generic[Context]):
 		self.llm = llm
 		self.controller = controller
 		self.sensitive_data = sensitive_data
-
+		self.interactive = interactive
 		self.settings = AgentSettings(
 			use_vision=use_vision,
 			use_vision_for_planner=use_vision_for_planner,
@@ -1068,7 +1072,10 @@ class Agent(Generic[Context]):
 				logger.info(f'🔄 Step {step + 1}/{max_steps} completed')
 
 				# Check if the agent needs to ask a question to the user
-				flag, question = await self._needs_user_input()
+				if step > 2 and self.interactive:
+					flag, question = await self._needs_user_input()
+				else:
+					flag = False
 
 				if flag:
 					logger.info(f'{question}')
