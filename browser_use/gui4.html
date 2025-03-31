@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agent Interface</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: ltr;
+      background: #222;
+      color: #fff;
+      padding: 20px;
+    }
+
+    #output {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 200px;
+      overflow-y: scroll;
+      background: #111;
+      margin-bottom: 10px;
+    }
+
+    #input {
+      width: calc(100% - 150px);
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    #send, #stop {
+      padding: 10px;
+      margin-left: 5px;
+    }
+
+    .message {
+      margin-bottom: 5px;
+    }
+
+    .agent {
+      color: #0f0;
+    }
+
+    .task {
+      color: #0af;
+    }
+
+    .stopped {
+      color: #f33;
+    }
+  </style>
+</head>
+<body>
+  <h1>Agent Interface</h1>
+  <div id="output"></div>
+
+  <input type="text" id="input" placeholder="What you want to do?" />
+  <button id="send">Send Task</button>
+  <button id="stop">Stop Task</button>
+
+  <script>
+    const output = document.getElementById('output');
+    const input = document.getElementById('input');
+    const sendButton = document.getElementById('send');
+    const stopButton = document.getElementById('stop');
+
+    const socket = new WebSocket('ws://localhost:8000/ws/status');
+
+    socket.onopen = () => console.log("WebSocket connected.");
+
+    socket.onmessage = (event) => {
+      const message = document.createElement('div');
+      message.className = 'message agent';
+      message.innerHTML = '<strong>Agent:</strong> ' + event.data;
+      output.appendChild(message);
+      output.scrollTop = output.scrollHeight;
+    };
+
+    input.addEventListener('keypress', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        sendButton.click();
+      }
+    });
+
+    sendButton.onclick = () => {
+      const task = input.value.trim();
+      if (!task) return;
+      input.value = '';
+
+      const taskMessage = document.createElement('div');
+      taskMessage.className = 'message task';
+      taskMessage.innerHTML = '<strong>Task sent:</strong> ' + task;
+      output.appendChild(taskMessage);
+      output.scrollTop = output.scrollHeight;
+
+      fetch('http://localhost:8000/run-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task })
+      }).catch(error => console.error('Error:', error));
+    };
+
+    stopButton.onclick = () => {
+      fetch('http://localhost:8000/stop-task', {
+        method: 'POST'
+      }).then(response => response.json())
+        .then(data => {
+          const stopMsg = document.createElement('div');
+          stopMsg.className = 'message stopped';
+          stopMsg.innerHTML = `<strong>${data.status === 'stopped' ? '🛑 Task stopped' : '⚠ No active task to stop'}</strong>`;
+          output.appendChild(stopMsg);
+          output.scrollTop = output.scrollHeight;
+        }).catch(error => console.error('Error:', error));
+    };
+  </script>
+</body>
+</html>

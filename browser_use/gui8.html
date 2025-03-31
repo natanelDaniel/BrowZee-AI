@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <title>Agent Chat</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1e1e1e;
+      color: #fff;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #output {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background-color: #2b2b2b;
+    }
+
+    .message {
+      max-width: 70%;
+      margin-bottom: 12px;
+      padding: 10px 15px;
+      border-radius: 12px;
+      line-height: 1.5;
+    }
+
+    .agent {
+      background-color: #444;
+      color: #0f0;
+      align-self: flex-start;
+    }
+
+    .task {
+      background-color: #007acc;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .stopped {
+      color: #f55;
+    }
+
+    #inputContainer {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background-color: #1a1a1a;
+      border-top: 1px solid #444;
+    }
+
+    #input {
+      flex: 1;
+      resize: none;
+      min-height: 40px;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #2a2a2a;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 15px;
+      margin-right: 10px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    #send {
+      background-color: #007acc;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #stop {
+      margin-left: 10px;
+      background-color: #aa2222;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #modeSelect {
+      margin-left: 10px;
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+<div style="position: absolute; top: 10px; right: 10px; display: flex; flex-direction: row-reverse; align-items: center; gap: 8px;">
+  <button id="langMenuBtn" style="background: none; border: none; color: white; font-size: 22px; cursor: pointer;">⋮</button>
+  <select id="langSelect" style="display: none; margin-top: 5px; background: #2a2a2a; color: white; border: none; padding: 5px; border-radius: 5px;">
+    <option value="he-IL">עברית</option>
+    <option value="en-US">English</option>
+    <option value="es-ES">Español</option>
+    <option value="fr-FR">Français</option>
+    <option value="ar-SA">عربي</option>
+  </select>
+
+  <!-- כאן עובר ה-modeSelect -->
+  <select id="modeSelect" style="margin-top: 8px; background-color: #333; color: white; border: none; padding: 8px; border-radius: 8px;">
+    <option value="task">Agent Task</option>
+    <option value="interactive-task">Interactive Agent Task</option>
+    <option value="chat">Chat</option>
+    <option value="chat-this-page">Chat on this Page</option>
+  </select>
+</div>
+  <div id="output"></div>
+
+  <div id="inputContainer">
+    <textarea id="input" placeholder="Type your message..."></textarea>
+
+    <button id="playPause" style="
+      background-color: #007acc;
+      border: none;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s;
+    ">
+      ▶️
+    </button>
+    <button id="stop">⏹</button>
+    <button id="micButton" title="הפעל מיקרופון" style="
+  background-color: #e91e63;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+  cursor: pointer;
+">
+  <i class="fas fa-microphone"></i>
+</button>
+
+  </div>
+
+  <script>
+    const socket = new WebSocket('ws://localhost:8000/ws/status');
+    const output = document.getElementById('output');
+    const input = document.getElementById('input');
+    const playPauseButton = document.getElementById('playPause');
+    const stopButton = document.getElementById('stop');
+    const modeSelect = document.getElementById('modeSelect');
+    const langSelect = document.getElementById('langSelect');
+    const langMenuBtn = document.getElementById('langMenuBtn');
+    let awaitingResponse = false;
+
+    socket.onopen = () => {
+      appendMessage("🔌 Connected to WebSocket", "system");
+    };
+
+    socket.onmessage = (event) => {
+      const msg = event.data;
+      appendMessage("Agent: " + msg, "agent");
+
+      if (msg.trim().endsWith("?")) {
+        awaitingResponse = true;
+      }
+      if (msg.trim().startsWith("Task completed")) {
+        playPauseButton.textContent = "▶️";
+        taskRunning = false;
+        isPaused = false;
+      }
+    };
+    let taskRunning = false;
+    let isPaused = false;
+
+    playPauseButton.onclick = () => {
+      const text = input.value.trim();
+      const mode = modeSelect.value;
+
+      if (!taskRunning) {
+        if (!text && mode !== "chat-this-page") return;
+
+        input.value = '';
+        appendMessage("You: " + text, "task");
+
+        fetch('http://localhost:8000/run-task', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task: text, mode: mode })
+        }).catch(error => console.error('Error:', error));
+
+        playPauseButton.textContent = '⏸';
+        taskRunning = true;
+        isPaused = false;
+
+      } else {
+        if (awaitingResponse) {
+          socket.send(text);
+          appendMessage("You: " + text, "task");
+          input.value = '';
+          awaitingResponse = false;
+        }
+        else {
+          // Pause/Resume logic
+          isPaused = !isPaused;
+          const action = isPaused ? "pause" : "resume";
+          playPauseButton.textContent = isPaused ? "▶️" : "⏸";
+
+          fetch(`http://localhost:8000/${action}-task`, {
+            method: 'POST'
+          }).then(res => res.json())
+                  .then(data => {
+                    appendMessage('Task ' + action + 'd', action);
+                  }).catch(error => console.error('Error:', error));
+        }
+      }
+    };
+    input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') playPauseButton.click();
+        });
+    stopButton.onclick = () => {
+      fetch('http://localhost:8000/stop-task', {
+        method: 'POST'
+      }).then(res => res.json())
+        .then(data => {
+          const msg = data.status === "stopped"
+            ? "🛑 Task stopped"
+            : "⚠️ No active task to stop";
+          appendMessage(msg, "stopped");
+          playPauseButton.textContent = "▶️";
+          taskRunning = false;
+          isPaused = false;
+        }).catch(error => console.error('Error:', error));
+    };
+
+    function appendMessage(text, className) {
+      const msg = document.createElement('div');
+      msg.className = 'message ' + className;
+      msg.textContent = text;
+      msg.innerHTML = text.replace(/\n/g, '<br>');
+      output.appendChild(msg);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    const micButton = document.getElementById('micButton');
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'he-IL'; // עברית – אפשר לשנות ל-en-US וכו'
+
+    micButton.onclick = () => {
+      recognition.start();
+      appendMessage("🎙️ speak...", "system");
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      input.value = transcript;
+      playPauseButton.click();
+    };
+
+    recognition.onerror = (event) => {
+      appendMessage("❌ Error: " + event.error, "system");
+    };
+    // Toggle visibility of the language selection dropdown
+    langMenuBtn.onclick = () => {
+      langSelect.style.display = langSelect.style.display === "none" ? "block" : "none";
+    };
+
+    // Update speech recognition language
+    langSelect.onchange = () => {
+      recognition.lang = langSelect.value;
+      appendMessage(`🌐 Recognition language changed to ${langSelect.options[langSelect.selectedIndex].text}`, "system");
+    };
+  </script>
+</body>
+</html>

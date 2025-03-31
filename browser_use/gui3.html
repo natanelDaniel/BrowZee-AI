@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agent Interface</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: ltr; /* fixed to LTR */
+      background: #222;
+      color: #fff;
+      padding: 20px;
+    }
+
+    #output {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 200px;
+      overflow-y: scroll;
+      background: #111;
+      margin-bottom: 10px;
+    }
+
+    #input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    #send {
+      padding: 10px;
+      margin-left: 5px;
+    }
+
+    .message {
+      margin-bottom: 5px;
+    }
+
+    .agent {
+      color: #0f0;
+    }
+
+    .task {
+      color: #0af;
+    }
+  </style>
+</head>
+<body>
+  <h1>Agent Interface</h1>
+  <div id="output"></div>
+
+  <input type="text" id="input" placeholder="What you want to do?" />
+  <button id="send">Send Task</button>
+
+  <script>
+    const output = document.getElementById('output');
+    const input = document.getElementById('input');
+    const sendButton = document.getElementById('send');
+
+    const socket = new WebSocket('ws://localhost:8000/ws/status');
+
+    socket.onopen = function () {
+      console.log("WebSocket connected.");
+    };
+
+    socket.onmessage = function (event) {
+      const agentMessage = document.createElement('div');
+      agentMessage.className = 'message agent';
+      agentMessage.innerHTML = '<strong>Agent:</strong> ' + event.data;
+      output.appendChild(agentMessage);
+      output.scrollTop = output.scrollHeight;
+    };
+
+    input.addEventListener('keypress', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        sendButton.click();
+      }
+    });
+
+    sendButton.onclick = function () {
+      const task = input.value;
+      if (!task.trim()) return;
+
+      input.value = '';
+
+      const taskMessage = document.createElement('div');
+      taskMessage.className = 'message task';
+      taskMessage.innerHTML = '<strong>Task sent:</strong> ' + task;
+      output.appendChild(taskMessage);
+      output.scrollTop = output.scrollHeight;
+
+      fetch('http://localhost:8000/run-task', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ task }),
+      }).catch((error) => {
+        console.error('Error:', error);
+      });
+    };
+  </script>
+</body>
+</html>
