@@ -104,6 +104,8 @@ Simply launch:
 ```bash
 <user_profile_path>/AppData/Local/Chromium/Application/chrome.exe
 ```
+entering AI interface:
+http://localhost:8000/
 
 It should open with remote debugging enabled.
 
