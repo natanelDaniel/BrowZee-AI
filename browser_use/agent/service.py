@@ -7,7 +7,6 @@ import re
 import time
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict, Generic, List, Optional, Type, TypeVar
-from asyncio import Future
 from dotenv import load_dotenv
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import (
@@ -44,7 +43,6 @@ from browser_use.dom.history_tree_processor.service import (
 	DOMHistoryElement,
 	HistoryTreeProcessor,
 )
-from typing import Optional
 
 from typing_extensions import Annotated, TypedDict
 from browser_use.telemetry.service import ProductTelemetry
@@ -57,34 +55,14 @@ from browser_use.utils import time_execution_async, time_execution_sync
 
 import socket
 from fastapi import FastAPI, WebSocket
-from app_services import app, send_to_websockets, websocket_endpoint
+from browser_use.app_services import app, send_to_websockets, websocket_endpoint, wait_for_user_response
+from MemoryManager import MemoryManager
 load_dotenv()
 logger = logging.getLogger(__name__)
-
+memory = MemoryManager(user_id="default_user")
 # Define the port and host for communication
 HOST = 'localhost'
 PORT = 65432
-
-
-user_response_future: Future = None
-
-websocket_connection: Optional[WebSocket] = None
-
-async def wait_for_user_response(question: str) -> str:
-	global user_response_future, websocket_connection
-	user_response_future = Future()
-
-	if websocket_connection:
-		await websocket_connection.send_text(question)
-	else:
-		raise Exception("No active WebSocket connection to user")
-
-	return await user_response_future
-
-async def receive_user_response(answer: str):
-	global user_response_future
-	if user_response_future and not user_response_future.done():
-		user_response_future.set_result(answer)
 
 
 
@@ -175,6 +153,8 @@ class Agent(Generic[Context]):
 	):
 		if page_extraction_llm is None:
 			page_extraction_llm = llm
+		if planner_llm is None:
+			planner_llm = llm
 
 		# Core components
 		self.task = task
@@ -366,8 +346,6 @@ class Agent(Generic[Context]):
 	async def step(self, step_info: Optional[AgentStepInfo] = None, user_responses=[]) -> None:
 		"""Execute one step of the task"""
 		logger.info(f'📍 Step {self.state.n_steps}')
-		if self.send_to_websockets_flag:
-			await send_to_websockets(f'📍 Step {self.state.n_steps}')
 		state = None
 		model_output = None
 		result: list[ActionResult] = []
@@ -541,6 +519,7 @@ class Agent(Generic[Context]):
 	async def get_next_action(self, input_messages: list[BaseMessage], user_responses: list[tuple[str, str]]) -> AgentOutput:
 		"""Get next action from LLM based on current state"""
 		input_messages = self._convert_input_messages(input_messages)
+		input_messages.insert(0, SystemMessage(content=memory.as_system_message()))
 		user_responses_str = '\n'.join([f'{question}: {answer}' for question, answer in user_responses])
 		new_msg = f'\n\nUser responses:\n{user_responses_str}'
 		input_messages.append(HumanMessage(content=new_msg))
@@ -960,7 +939,8 @@ class Agent(Generic[Context]):
 		# Create planner message history using full message history
 		planner_messages = [
 			PlannerPrompt(self.controller.registry.get_prompt_description()).get_system_message(),
-			*self._message_manager.get_messages()[1:],  # Use full message history except the first
+			SystemMessage(content=memory.as_system_message()),
+			*self._message_manager.get_messages()[1:],
 		]
 
 		if not self.settings.use_vision_for_planner and self.settings.use_vision:
@@ -992,6 +972,7 @@ class Agent(Generic[Context]):
 		try:
 			plan_json = json.loads(plan)
 			logger.info(f'Planning Analysis:\n{json.dumps(plan_json, indent=4)}')
+			await send_to_websockets(plan_json['next_steps'][0])
 		except json.JSONDecodeError:
 			logger.info(f'Planning Analysis:\n{plan}')
 		except Exception as e:
@@ -1008,8 +989,6 @@ class Agent(Generic[Context]):
 		"""Execute the task interactively with maximum number of steps"""
 		self.structured_llm = self.llm.with_structured_output(need_user, include_raw=True)
 		try:
-			# send to websockets - starting ... 
-			await send_to_websockets('starting ...')
 			await self._log_agent_run(send_to_websockets_flag=True)
 
 			# Execute initial actions if provided
@@ -1141,10 +1120,13 @@ class Agent(Generic[Context]):
 		  "question": "Your question here if needed"
 		"""
 		screenshot_base64 = image_to_base64(screenshot)
-		messages = [HumanMessage(content=[
-			{"type": "text", "text": message_text},
-			{"type": "image_url", "image_url": {"url": screenshot_base64}}
-		])]
+		messages = [
+			SystemMessage(content=memory.as_system_message()),  # 🧠 inject memory
+			HumanMessage(content=[
+				{"type": "text", "text": message_text},
+				{"type": "image_url", "image_url": {"url": screenshot_base64}}
+			])
+		]
 		# Use the AI model to predict if user input is needed and identify missing information
 		ai_model = self.structured_llm
 		response: dict[str, Any] = await ai_model.ainvoke(messages)
@@ -1165,6 +1147,9 @@ class Agent(Generic[Context]):
 		# Directly append the response to the agent's state or context
 		self.user_responses.append((response, question))
 		print(f'Appended user response to agent state: {response}')
+		asyncio.create_task(
+			memory.update_memory(self.llm, f"User was asked: {question}\nUser answered: {response}")
+		)
 
 	async def _get_user_response(self, question: str) -> str:
 		"""שלח שאלה למשתמש דרך WebSocket וחכה לתשובה"""

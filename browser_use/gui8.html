@@ -32,7 +32,7 @@
 
     .agent {
       background-color: #444;
-      color: #0f0;
+      color: white;
       align-self: flex-start;
     }
 
@@ -172,8 +172,12 @@
 
     socket.onmessage = (event) => {
       const msg = event.data;
-      appendMessage("Agent: " + msg, "agent");
-
+      appendMessage(msg, "agent");
+      if (modeSelect === "chat-this-page" || modeSelect === "chat") {
+        playPauseButton.textContent = "▶️";
+        taskRunning = false;
+        isPaused = false;
+      }
       if (msg.trim().endsWith("?")) {
         awaitingResponse = true;
       }
@@ -194,7 +198,7 @@
         if (!text && mode !== "chat-this-page") return;
 
         input.value = '';
-        appendMessage("You: " + text, "task");
+        appendMessage(text, "task");
 
         fetch('http://localhost:8000/run-task', {
           method: 'POST',
@@ -209,7 +213,7 @@
       } else {
         if (awaitingResponse) {
           socket.send(text);
-          appendMessage("You: " + text, "task");
+          appendMessage(text, "task");
           input.value = '';
           awaitingResponse = false;
         }

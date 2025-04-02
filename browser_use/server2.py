@@ -14,15 +14,14 @@ from typing import Optional
 from typing_extensions import Annotated, TypedDict
 import asyncio
 from fastapi.middleware.cors import CORSMiddleware
-from browser_use.agent.service import wait_for_user_response, receive_user_response
+from browser_use.agent.service import memory
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import (
     BaseMessage,
     HumanMessage,
     SystemMessage,
 )
-from app_services import app, send_to_websockets, websocket_endpoint
-
+from browser_use.app_services import app, send_to_websockets, websocket_endpoint
 active_agent = None
 
 class TaskRequest(BaseModel):
@@ -107,21 +106,37 @@ async def run_task(request: TaskRequest):
             screenshot = pyautogui.screenshot(region=(left, top, width, height))
             screenshot_base64 = image_to_base64(screenshot)
 
-            message_text = f"""This is a screenshot of the current web page. The user asked:\n"{task_text}"\nAnswer based on the visual content if possible."""
-            messages = [HumanMessage(content=[
-                {"type": "text", "text": message_text},
-                {"type": "image_url", "image_url": {"url": screenshot_base64}}
-            ])]
+            existing_memory = memory.as_system_message()
+            messages = [
+                SystemMessage(content=existing_memory),
+                *memory.get_short_term_messages(),
+                HumanMessage(content=[
+                    {"type": "text",
+                     "text": f'This is a screenshot of the current web page. The user asked:\n"{task_text}"\nAnswer based on the visual content if possible.'},
+                    {"type": "image_url", "image_url": {"url": screenshot_base64}}
+                ])
+            ]
             answer = await model.ainvoke(messages)
             await send_to_websockets(answer.content)
+            # Update memory with both text + response
+            await memory.update_memory(model, task_text + '\n\n' + answer.content)
+
             return answer
         else:
             error_msg = "❌ No Chromium window found for screenshot."
             await send_to_websockets(error_msg)
             return {"error": error_msg}
     elif mode == "chat":
-        answer = await model.ainvoke([HumanMessage(content=task_text)])
+        existing_memory = memory.as_system_message()
+        messages = [
+            SystemMessage(content=existing_memory),
+            *memory.get_short_term_messages(),
+            HumanMessage(content=task_text)
+        ]
+        answer = await model.ainvoke(messages)
+        # answer = await model.ainvoke([HumanMessage(content=task_text)])
         await send_to_websockets(answer.content)
+        await memory.update_memory(model, task_text + '\n\n' + answer.content)
         return answer
 
     elif mode == "task" or mode == "interactive-task":
@@ -147,7 +162,10 @@ async def run_task(request: TaskRequest):
         agent_result = await active_agent.run_interactive()
         result = agent_result.final_result()
         active_agent = None
-        result = "Task completed.\n" + result
+        if request is not None:
+            result = "Task completed.\n" + result
+        else:
+            result = "Task stopped.\n"
         await send_to_websockets(result)
         return result
 
