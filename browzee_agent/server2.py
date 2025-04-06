@@ -45,7 +45,7 @@ class NeedAgent(TypedDict):
 @app.get("/")
 def root():
     current_dir = os.path.dirname(__file__)  # מיקום הקובץ server2.py
-    html_path = os.path.join(current_dir, "gui8.html")
+    html_path = os.path.join(current_dir, "main_gui.html")
     return FileResponse(html_path)
 
 @app.websocket("/ws/status")
