@@ -54,7 +54,7 @@ Under "System variables", find the "Path" variable and select "Edit"
 Add the path to the Depot Tools directory (e.g., C:\path\to\depot_tools) to the list
 open a powershall on your src folder
 ```bash
-$env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
+$env:DEPOT_TOOLS_WIN_TOOLCHAIN = "0"
 fetch chromium
 ```
 ```bash
