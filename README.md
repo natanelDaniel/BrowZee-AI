@@ -18,15 +18,7 @@ pip install -r requirements.txt
 ### 3. Build the `ai_server.exe` file using PyInstaller (Its preferable from administrator cmd):
 
 ```bash
-pyinstaller ^
-  --hidden-import=pydantic ^
-  --hidden-import=pydantic-core ^
-  --hidden-import=pydantic.deprecated.decorator ^
-  --onefile ^
-  --uac-admin ^
-  --add-data "venv/Lib/site-packages/browser_use/agent/system_prompt.md;browser_use/agent" ^
-  --add-data "venv/Lib/site-packages/browser_use/dom/buildDomTree.js;browser_use/dom" ^
-  ai_server.py
+pyinstaller ^ --hidden-import=pydantic ^--hidden-import=playwright ^--hidden-import=PIL ^--hidden-import=posthog ^--hidden-import=PIL.Image ^ --hidden-import=selenium ^--hidden-import=pydantic-core ^ --hidden-import=pydantic.deprecated.decorator ^ --onefile ^ --uac-admin ^ --add-data "browzee_agent/agent/system_prompt.md;browzee_agent/agent" ^ --add-data "browzee_agent/dom/buildDomTree.js;browzee_agent/dom" ^ server2.py
 ```
 or
 ```bash
@@ -62,7 +54,7 @@ Under "System variables", find the "Path" variable and select "Edit"
 Add the path to the Depot Tools directory (e.g., C:\path\to\depot_tools) to the list
 open a powershall on your src folder
 ```bash
-$env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
+$env:DEPOT_TOOLS_WIN_TOOLCHAIN = "0"
 fetch chromium
 ```
 ```bash
