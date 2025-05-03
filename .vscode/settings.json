@@ -1,0 +1,26 @@
+{
+    "files.associations": {
+        "array": "cpp",
+        "compare": "cpp",
+        "format": "cpp",
+        "functional": "cpp",
+        "memory": "cpp",
+        "ratio": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "variant": "cpp",
+        "xmemory": "cpp",
+        "xstring": "cpp",
+        "xtr1common": "cpp",
+        "xutility": "cpp",
+        "__hash_table": "cpp",
+        "__tree": "cpp",
+        "forward_list": "cpp",
+        "limits": "cpp",
+        "chrono": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "chrome_action_id.h": "c"
+    }
+}

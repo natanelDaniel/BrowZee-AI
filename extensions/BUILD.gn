@@ -1,0 +1,22 @@
+source_set("extension_resources") {
+  # This target includes resources for various extensions.
+  # Add new extension directories here.
+  data = [
+    "//extensions/browser/resources/extension_developer_info/",
+    "//extensions/browser/resources/options_page/",
+    "//extensions/browser/resources/sync_file_system_internals/",
+    "//extensions/browser/resources/api_features_page/",
+    "//extensions/browser/resources/extensions_internals/",
+    "//extensions/browser/resources/guest_view/app_view/",
+    "//extensions/browser/resources/guest_view/extension_options/",
+    "//extensions/browser/resources/guest_view/extension_options_guest.css",
+    "//extensions/browser/resources/guest_view/extension_options_guest.js",
+    "//extensions/browser/resources/guest_view/web_view/",
+    "//extensions/browser/resources/guest_view/web_view_attributes.js",
+    "//extensions/browser/resources/guest_view/web_view_experimental.js",
+    "//extensions/browser/resources/guest_view/web_view_request_bytes_logger.js",
+    "//extensions/browser/resources/guest_view/web_view_tag.js",
+    "//extensions/browser/resources/blob_filter/",
+    "//extensions/browzee_assistant/",
+  ]
+} 

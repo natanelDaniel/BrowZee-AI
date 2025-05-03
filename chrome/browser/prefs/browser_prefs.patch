@@ -1,0 +1,47 @@
+#include "chrome/browser/prefs/browser_prefs.cc
++++ chrome/browser/prefs/browser_prefs.cc
+@@ -282,7 +282,7 @@
+ #include "chrome/browser/policy/chrome_browser_policy_connector.h"
+ #include "chrome/browser/privacy_sandbox/privacy_sandbox_service.h"
+ #include "chrome/browser/prefs/browser_prefs_browser_controls.h"
+-#include "chrome/browser/promos/promos_utils.h  // nogncheck crbug.com/1125897
++#include "chrome/browser/promos/promos_utils.h"  // nogncheck crbug.com/1125897
+ #include "chrome/browser/push_messaging/push_messaging_service_impl.h"
+ #include "chrome/browser/read_later/reading_list_model_factory.h"
+ #include "chrome/browser/resource_coordinator/tab_manager.h"
+@@ -1362,7 +1362,7 @@
+   RegisterBackgroundSyncProfilePrefs(registry);
+   
+   // Migrate syncing theme prefs to non-syncing if needed.
+-  MigrateSyncingThemePrefsToNonSyncingIfNeeded(profile_prefs);
++  MigrateSyncingThemePrefsToNonSyncingIfNeeded(registry);
+ 
+   // Register profile prefs for Chrome-branded features.
+   ChromeLoadTimeStats::RegisterProfilePrefs(registry);
+@@ -1781,7 +1781,7 @@
+   prefs::RegisterOpenNetworkConfiguration(registry);
+   
+   // Register encryption prefs.
+-  OSCrypt::RegisterLocalPrefs(registry);
++  ::OSCrypt::RegisterLocalPrefs(registry);
+   
+   // Register managed configuration prefs.
+   policy::ManagedConfiguration::RegisterPrefs(registry);
+@@ -1815,7 +1815,7 @@
+   // Register content::PlatformNotificationService preferences.
+   DesktopNotificationServiceFactory::RegisterPrefs(registry);
+   
+-  PlatformAuthPolicyObserver::RegisterPrefs(registry);
++  ::PlatformAuthPolicyObserver::RegisterPrefs(registry);
+   
+   // Register preferences used by supervised users.
+   RegisterSupervisedUserPrefs(registry);
+@@ -2058,7 +2058,7 @@
+   prefs::RegisterMediaRouterProfilePrefs(registry);
+ 
+   // Register promo utilities preferences.
+-  promos_utils::RegisterProfilePrefs(registry);
++  ::promos_utils::RegisterProfilePrefs(registry);
+ 
+   RegisterProfilePrefsForServices(registry);
+ } 

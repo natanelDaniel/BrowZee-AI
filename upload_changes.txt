@@ -1,0 +1,24 @@
+$targetRoot = "C:\Users\21dan\chromium_ai_browser\chromium_changes"
+
+git status --porcelain | ForEach-Object {
+    $line = $_.Trim()
+    $status = $line.Substring(0, 2)
+    $path = $line.Substring(3)
+
+    # נכלול רק קבצים ששונו או חדשים
+    if ($status -eq " M" -or $status -eq "??") {
+        $source = Join-Path "." $path
+        $destination = Join-Path $targetRoot $path
+
+        if (Test-Path $source) {
+            $destDir = Split-Path $destination
+            if (-not (Test-Path $destDir)) {
+                New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+            }
+
+            Copy-Item -Path $source -Destination $destination -Force
+        }
+    }
+}
+
+Write-Host "`n✅ Only files visible in git status were copied to $targetRoot"

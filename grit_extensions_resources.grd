@@ -1,0 +1,12 @@
+<includes>
+  <!-- Include BrowZee Assistant files -->
+  <include name="IDR_BROWZEE_ASSISTANT_MANIFEST" file="extensions/browzee_assistant/manifest.json" type="BINDATA" />
+  <include name="IDR_BROWZEE_ASSISTANT_INDEX_HTML" file="extensions/browzee_assistant/index.html" type="BINDATA" />
+  <include name="IDR_BROWZEE_ASSISTANT_INDEX_JS" file="extensions/browzee_assistant/index.js" type="BINDATA" />
+  <include name="IDR_BROWZEE_ASSISTANT_STYLE_CSS" file="extensions/browzee_assistant/style.css" type="BINDATA" />
+  <include name="IDR_BROWZEE_ASSISTANT_BG_JS" file="extensions/browzee_assistant/bg.js" type="BINDATA" />
+  
+  <!-- Include BrowZee Assistant icons (copied to extension dir) -->
+  <include name="IDR_BROWZEE_ASSISTANT_ICON32_PNG" file="extensions/browzee_assistant/icon32.png" type="BINDATA" />
+  <include name="IDR_BROWZEE_ASSISTANT_ICON128_PNG" file="extensions/browzee_assistant/icon128.png" type="BINDATA" />
+</includes> 

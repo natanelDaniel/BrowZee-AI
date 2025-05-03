@@ -1,0 +1,24 @@
+    // Copyright 2024 The BrowZee Authors
+    // Use of this source code is governed by a BSD-style license that can be
+    // found in the LICENSE file.
+
+    // Defines the Mojo interface for communication between the New Tab Page UI
+    // (renderer process) and the browser process C++ handler for Browzee features.
+
+    module browzee.mojom;
+
+    // Implemented by the renderer (JavaScript) to receive messages from the handler.
+    interface BrowzeePage {
+      // Called by the C++ handler when an agent response is received (e.g., from WebSocket).
+      OnAgentResponse(string message);
+    };
+
+    // Implemented by the browser process (C++) to handle requests from the page.
+    interface BrowzeePageHandler {
+      // Called by the JS page immediately upon connection to establish two-way communication.
+      // Provides the handler with a remote reference to the page.
+      SetPage(pending_remote<BrowzeePage> page);
+
+      // Called by the JS page when the user submits a message/task.
+      SendMessage(string task_text);
+    };

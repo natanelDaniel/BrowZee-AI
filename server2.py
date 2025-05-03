@@ -1,4 +1,4 @@
-from browser_use.agent import service
+from browzee_agent.agent import service
 from fastapi import FastAPI, WebSocket
 from typing import Literal
 from pydantic import BaseModel
@@ -6,35 +6,30 @@ from dotenv import load_dotenv
 import uvicorn
 import os
 from langchain_openai import ChatOpenAI
-from browser_use import Agent
-from browser_use import BrowserConfig
-from browser_use import Browser
+from browzee_agent import Agent
+from browzee_agent import BrowserConfig
+from browzee_agent import Browser
+from fastapi.responses import FileResponse
 from typing import Optional
 from typing_extensions import Annotated, TypedDict
 import asyncio
 from fastapi.middleware.cors import CORSMiddleware
-from browser_use.agent.service import wait_for_user_response, receive_user_response
-from browser_use.agent.service import websocket_endpoint, app  # ייבוא מהשירות
+from browzee_agent.agent.service import memory
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import (
     BaseMessage,
     HumanMessage,
     SystemMessage,
 )
-from browser_use.agent.service import send_to_websockets
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # אפשר הכל כדי לבדוק
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+from langgraph.prebuilt import create_react_agent
+from langgraph.store.memory import InMemoryStore
+from langmem import create_manage_memory_tool, create_search_memory_tool
+from browzee_agent.app_services import app, send_to_websockets, websocket_endpoint
 active_agent = None
 
 class TaskRequest(BaseModel):
     task: str
-    mode: Literal["task", "chat", "chat-this-page"]
+    mode: Literal["task", "chat", "chat-this-page", "interactive-task"]
 
 
 class StatusRequest(BaseModel):
@@ -49,7 +44,9 @@ class NeedAgent(TypedDict):
 
 @app.get("/")
 def root():
-    return {"status": "ok"}
+    current_dir = os.path.dirname(__file__)  # מיקום הקובץ server2.py
+    html_path = os.path.join(current_dir, "main_gui.html")
+    return FileResponse(html_path)
 
 @app.websocket("/ws/status")
 async def websocket_status(websocket):
@@ -112,21 +109,37 @@ async def run_task(request: TaskRequest):
             screenshot = pyautogui.screenshot(region=(left, top, width, height))
             screenshot_base64 = image_to_base64(screenshot)
 
-            message_text = f"""This is a screenshot of the current web page. The user asked:\n"{task_text}"\nAnswer based on the visual content if possible."""
-            messages = [HumanMessage(content=[
-                {"type": "text", "text": message_text},
-                {"type": "image_url", "image_url": {"url": screenshot_base64}}
-            ])]
+            existing_memory = memory.as_system_message()
+            messages = [
+                SystemMessage(content=existing_memory),
+                *memory.get_short_term_messages(),
+                HumanMessage(content=[
+                    {"type": "text",
+                     "text": f'This is a screenshot of the current web page. The user asked:\n"{task_text}"\nAnswer based on the visual content if possible.'},
+                    {"type": "image_url", "image_url": {"url": screenshot_base64}}
+                ])
+            ]
             answer = await model.ainvoke(messages)
             await send_to_websockets(answer.content)
+            # Update memory with both text + response
+            await memory.update_memory(model, task_text + '\n\n' + answer.content)
+
             return answer
         else:
             error_msg = "❌ No Chromium window found for screenshot."
             await send_to_websockets(error_msg)
             return {"error": error_msg}
     elif mode == "chat":
-        answer = await model.ainvoke([HumanMessage(content=task_text)])
+        existing_memory = memory.as_system_message()
+        messages = [
+            SystemMessage(content=existing_memory),
+            *memory.get_short_term_messages(),
+            HumanMessage(content=task_text)
+        ]
+        answer = await model.ainvoke(messages)
+        # answer = await model.ainvoke([HumanMessage(content=task_text)])
         await send_to_websockets(answer.content)
+        await memory.update_memory(model, task_text + '\n\n' + answer.content)
         return answer
 
     elif mode == "task" or mode == "interactive-task":
@@ -143,15 +156,20 @@ async def run_task(request: TaskRequest):
             interactive = True
         else:
             interactive = False
+        planner_llm = model
         active_agent = Agent(
             browser=browser,
             task=task_text,
-            llm=ChatOpenAI(model="gpt-4o"),
-            send_to_websockets_flag=True, interactive=interactive
+            llm=model,
+            send_to_websockets_flag=True, interactive=interactive, planner_llm=planner_llm
         )
         agent_result = await active_agent.run_interactive()
         result = agent_result.final_result()
         active_agent = None
+        if request is not None:
+            result = "Task completed.\n" + result
+        else:
+            result = "Task stopped.\n"
         await send_to_websockets(result)
         return result
 
@@ -163,8 +181,17 @@ if __name__ == "__main__":
     load_dotenv()
 
     # Manually set the API key if needed
-    os.environ[
-        "OPENAI_API_KEY"] = "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"
-    need_agent_model = ChatOpenAI(model="gpt-4o").with_structured_output(NeedAgent, include_raw=True)
-    model = ChatOpenAI(model="gpt-4o-mini")
+    # os.environ["OPENAI_API_KEY"] = "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"
+    os.environ["OPENAI_API_KEY"] = "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"
+    
+    # model = ChatOpenAI(model="gpt-4o")
+    model = ChatOpenAI(model="gpt-4.1")
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     uvicorn.run(app, host="127.0.0.1", port=8000,log_config=None)
