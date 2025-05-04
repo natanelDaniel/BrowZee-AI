@@ -101,6 +101,10 @@ http://localhost:8000/
 
 It should open with remote debugging enabled.
 
+lunch with log:
+```bash
+ .\out\Default\chrome.exe --enable-logging --v=1 --log-file="C:\Users\21dan\chromium_ai_browser\src\out\Default\chrome_debug.log"
+```
 ## 🧩 Future Features
 
 - AI DOM agent with in-browser chat box
