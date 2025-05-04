@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' http://localhost:8000 ws://localhost:8000 http://127.0.0.1:8000 ws://127.0.0.1:8000 https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' http://localhost:8000 http://127.0.0.1:8000 https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self' http://localhost:8000 ws://localhost:8000 http://127.0.0.1:8000 ws://127.0.0.1:8000; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; worker-src 'self' blob:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrowZee Assistant</title>
+  <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-rgb: 139, 92, 246;
+      --accent: #00bcd4;
+      --background: #111827;
+      --panel: #1f2937;
+      --input-bg: #374151;
+      --text: #f3f4f6;
+      --subtle: #9ca3af;
+      --hover-bg: rgba(255, 255, 255, 0.08);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Planet animation styles - smaller for side panel */
+    #planetSystem {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 10px;
+    }
+
+    #planet {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100px;
+      height: 100px;
+      margin-top: -50px;
+      margin-left: -50px;
+      background: radial-gradient(circle at 30% 30%, #a78bfa, #8b5cf6);
+      border-radius: 50%;
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+      z-index: 10;
+    }
+
+    .orbit-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: center;
+      animation-name: rotate;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      animation: shimmer 4s ease-in-out infinite;
+      transition: z-index 0.3s, opacity 0.3s, filter 0.3s;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Make the planet container disappear in chat mode */
+    .chat-active #planetSystem {
+      display: none !important;
+      visibility: hidden;
+      opacity: 0;
+      height: 0;
+      width: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      position: absolute;
+    }
+
+    @keyframes fadeSlideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body.light-mode {
+      --background: #f9fafb;
+      --panel: #ffffff;
+      --input-bg: #f0f2f5;
+      --text: #1f2937;
+      --subtle: #4b5563;
+      --hover-bg: rgba(0, 0, 0, 0.05);
+      --primary: #7c3aed;
+      --primary-rgb: 124, 58, 237;
+      --border: rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      border: none !important;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    #output {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background-color: transparent !important;
+      border-radius: 0;
+      margin: 0;
+      box-shadow: none;
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 100px;
+      box-sizing: border-box;
+    }
+
+    .centered-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+      transition: all 0.6s ease-out;
+      margin-top: -20px;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 0 8px;
+    }
+
+    .chat-active .centered-container {
+      height: auto;
+      padding-bottom: 80px;
+      justify-content: flex-start;
+      margin-top: 0;
+      background: transparent;
+    }
+
+    #welcomeMessage {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 20px;
+      animation: fadeSlideIn 1.2s ease-out forwards;
+      transition: opacity 0.5s ease-out;
+      padding: 0 5px;
+      white-space: normal;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .chat-active #welcomeMessage {
+      opacity: 0;
+      height: 0;
+      margin: 0;
+      overflow: hidden;
+      display: none;
+      visibility: hidden;
+    }
+
+    #inputContainer {
+      width: calc(100% - 10px);
+      max-width: 100%;
+      background-color: var(--panel);
+      border-radius: 12px;
+      padding: 8px 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      z-index: 9999;
+      transition: all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      margin-bottom: 0;
+      backdrop-filter: blur(10px);
+      box-sizing: border-box;
+      justify-content: space-between;
+    }
+
+    .chat-active #inputContainer {
+      position: fixed;
+      bottom: 15px;
+      left: 0;
+      right: 0;
+      margin: 0 5px;
+      background-color: var(--panel);
+      z-index: 10000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .input-left-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      /* Display the group since we now have a button */
+      display: flex;
+    }
+
+    .input-right-group {
+      display: flex;
+      align-items: center;
+    }
+
+    #input {
+      flex: 1;
+      resize: none;
+      min-height: 38px;
+      max-height: 80px;
+      overflow-y: auto;
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: none;
+      padding: 8px 12px;
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.4;
+      font-family: 'Inter', sans-serif;
+      border-radius: 8px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    #input:focus {
+      outline: none;
+      background-color: rgba(255, 255, 255, 0.07);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    body.light-mode #inputContainer {
+      background-color: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode #input:focus {
+      background-color: rgba(0, 0, 0, 0.02);
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+    }
+
+    #input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .light-mode #input::placeholder {
+      color: rgba(0, 0, 0, 0.4);
+    }
+
+    #input:focus {
+      outline: none;
+    }
+   
+    #playPause, #stop {
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      color: var(--text);
+      background: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 14px;
+    }
+   
+    #playPause {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: 0 2px 10px rgba(var(--primary-rgb), 0.5);
+    }
+   
+    #stop {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .initial-screen #stop {
+      display: none;
+    }
+
+    .chat-active #stop {
+      display: flex;
+    }
+
+    /* Message styling for side panel */
+    .message {
+      max-width: 100%;
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      border-radius: 14px;
+      line-height: 1.4;
+      font-size: 13px;
+      animation: fadeSlideIn 0.3s ease-out forwards;
+      position: relative;
+      display: flex;
+      align-items: center;
+      box-shadow: none;
+    }
+
+    /* Status messages with icons - made more compact */
+    .status-message {
+      padding: 6px 12px 6px 30px;
+      position: relative;
+      max-width: 100%;
+      width: auto;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      background-color: rgba(59, 130, 246, 0.08);
+      color: var(--text);
+      animation: fadeSlideIn 0.4s ease-out forwards;
+      box-shadow: none;
+      border-left: 3px solid #3b82f6;
+    }
+
+    .status-message::before {
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 8px;
+      font-size: 12px;
+    }
+
+    /* Different styling for agent vs user messages */
+    .agent {
+      background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+      color: var(--text);
+      align-self: flex-start;
+      margin-right: 2%;
+      margin-left: 0;
+      border-radius: 14px 14px 14px 4px;
+      position: relative;
+      border-left: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .task {
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+      color: var(--text);
+      align-self: flex-end;
+      margin-left: 2%;
+      margin-right: 0;
+      border-radius: 14px 14px 4px 14px;
+      position: relative;
+      border-right: none;
+      border-left: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Mobile-friendly button adjustments */
+    #leftButtons, #rightButtons {
+      position: fixed;
+      top: 5px;
+      z-index: 9999;
+    }
+
+    #leftButtons {
+      left: 5px;
+      display: flex;
+      gap: 4px;
+    }
+
+    #rightButtons {
+      right: 5px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .button {
+      background: none;
+      color: var(--text);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .button i {
+      font-size: 14px;
+    }
+
+    /* Dark mode styles for messages */
+    body:not(.light-mode) .agent {
+      background: linear-gradient(135deg, #3f4554, #2a2f3c);
+      color: #f3f4f6;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    body:not(.light-mode) .task {
+      background: linear-gradient(135deg, #5b33a3, #4c1d95);
+      color: #f3f4f6;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Light mode styles for messages */
+    body.light-mode .agent {
+      background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+      color: #1f2937;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    body.light-mode .task {
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+      color: #1f2937;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .stopped {
+      background-color: rgba(239, 68, 68, 0.08);
+      color: #ef4444;
+      align-self: center;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      max-width: 95%;
+      margin: 6px auto;
+      box-shadow: 0 2px 5px rgba(239, 68, 68, 0.1);
+      border: none;
+      font-size: 12px;
+    }
+
+    /* Improved responsive disclaimer bar */
+    #disclaimerBar {
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      background: rgba(20, 25, 35, 0.5);
+      color: #9ca3af;
+      font-size: 9px;
+      z-index: 9995;
+      backdrop-filter: blur(5px);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+      height: 14px;
+      box-sizing: border-box;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    body.light-mode #disclaimerBar {
+      background: rgba(241, 245, 249, 0.5);
+      color: #64748b;
+      border-top: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    #disclaimerText {
+      max-width: 75%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #disclaimerBar a {
+      color: #8b5cf6;
+      text-decoration: none;
+      margin-left: 3px;
+      font-size: 9px;
+    }
+   
+    #disclaimerBar a:hover {
+      text-decoration: underline;
+    }
+
+    /* Action buttons tooltips - more visible */
+    #playPause, #stop {
+      position: relative;
+      transition: all 0.25s ease;
+      margin-left: 4px;
+    }
+   
+    /* Utility class to create a container for action buttons with equal spacing */
+    .action-buttons-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2px;
+      margin-left: 3px;
+    }
+   
+    #playPause {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: 0 2px 10px rgba(var(--primary-rgb), 0.5);
+    }
+   
+    #stop {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    /* Processing indicator styles */
+    .processing-indicator {
+      display: none;
+      position: fixed;
+      left: 0;
+      bottom: 24px;
+      width: 100%;
+      padding: 8px 0;
+      background: rgba(30, 41, 59, 0.4) !important;
+      backdrop-filter: blur(5px);
+      color: var(--text);
+      text-align: center;
+      font-size: 11px;
+      z-index: 9996;
+      animation: fadeIn 0.3s ease-out;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Agent thinking/loading indicator */
+    .agent-thinking-indicator {
+      align-self: flex-start;
+      margin-left: 0;
+      margin-right: auto;
+      margin-top: 6px;
+      margin-bottom: 6px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(135deg, rgba(91, 33, 182, 0.07), rgba(124, 58, 237, 0.08));
+      box-shadow: 0 2px 15px rgba(124, 58, 237, 0.08), 0 0 1px rgba(0, 0, 0, 0.1);
+      max-width: 60px;
+      z-index: 1;
+      transform: scale(0.9);
+    }
+
+    /* Responsive layout for narrow side panel */
+    @media (max-width: 320px) {
+      #inputContainer {
+        padding: 6px 8px;
+      }
+      
+      #input {
+        min-height: 34px;
+        font-size: 12px;
+        padding: 6px 8px;
+        margin: 0 6px;
+      }
+      
+      #playPause, #stop, .mode-button {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+      }
+      
+      .mode-menu-dropdown {
+        width: 170px;
+        top: auto;
+      }
+      
+      .mode-item {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+    }
+    
+    @media (min-width: 321px) and (max-width: 350px) {
+      #inputContainer {
+        padding: 6px 8px;
+      }
+      
+      #input {
+        min-height: 36px;
+        font-size: 13px;
+        padding: 7px 9px;
+        margin: 0 6px;
+      }
+      
+      #playPause, #stop, .mode-button {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+      }
+    }
+    
+    @media (min-width: 351px) and (max-width: 600px) {
+      #planetSystem {
+        width: 180px;
+        height: 180px;
+      }
+      
+      #planet {
+        width: 100px;
+        height: 100px;
+        margin-top: -50px;
+        margin-left: -50px;
+      }
+      
+      #welcomeMessage {
+        font-size: 22px;
+      }
+      
+      .button i {
+        font-size: 12px;
+      }
+      
+      #playPause, #stop {
+        width: 28px;
+        height: 28px;
+      }
+    }
+    
+    @media (min-width: 601px) {
+      #planetSystem {
+        width: 200px;
+        height: 200px;
+      }
+      
+      #planet {
+        width: 120px;
+        height: 120px;
+        margin-top: -60px;
+        margin-left: -60px;
+      }
+      
+      #welcomeMessage {
+        font-size: 28px;
+      }
+      
+      .button i {
+        font-size: 14px;
+      }
+      
+      #playPause, #stop {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    /* Add responsive styles for disclaimer bar */
+    @media (max-width: 350px) {
+      #disclaimerBar {
+        font-size: 8px;
+        padding: 1px 4px;
+        height: 12px;
+      }
+      
+      #disclaimerText {
+        max-width: 70%;
+      }
+      
+      #disclaimerBar a {
+        font-size: 8px;
+        margin-left: 2px;
+      }
+      
+      .chat-active #inputContainer {
+        bottom: 14px;
+      }
+      
+      #inputContainer {
+        padding: 4px 6px;
+        background-color: var(--panel);
+      }
+      
+      #input {
+        min-height: 26px;
+        font-size: 12px;
+        padding: 4px 5px;
+        margin-right: 2px;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      body.light-mode #inputContainer {
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+      
+      body.light-mode #input {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+      
+      .action-buttons-container {
+        transform: scale(0.9);
+        margin-right: -2px;
+      }
+      
+      #playPause, #stop {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+      }
+      
+      #output {
+        padding-bottom: 80px;
+      }
+    }
+
+    /* Change icon when task is running */
+    #playPause.task-running i {
+      transform: rotate(180deg);
+    }
+
+    /* Mode selector styles */
+    .mode-selector {
+      position: relative;
+      z-index: 10001;
+    }
+    
+    .mode-button {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: rgba(var(--primary-rgb), 0.1);
+      color: var(--primary);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .mode-button:hover {
+      background-color: rgba(var(--primary-rgb), 0.2);
+    }
+    
+    .mode-menu-dropdown {
+      position: absolute;
+      top: auto;
+      left: 0;
+      background-color: var(--panel);
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      width: 200px;
+      display: none;
+      z-index: 10002;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    
+    .mode-menu-dropdown.show {
+      display: block;
+    }
+    
+    .mode-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 13px;
+    }
+    
+    .mode-item:hover {
+      background-color: var(--hover-bg);
+    }
+    
+    .mode-item.active {
+      background-color: rgba(var(--primary-rgb), 0.1);
+      color: var(--primary);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body class="initial-screen light-mode">
+  <div id="rightButtons">
+    <button id="themeIconBtn" class="button" title="Toggle Theme">
+      <i id="themeIcon" class="fa-solid fa-circle-half-stroke"></i>
+    </button>
+  </div>
+
+  <div class="centered-container">
+      <!-- Planet animation -->
+      <div id="planetSystem">
+        <div id="planet"></div>
+      </div>
+
+      <div id="welcomeMessage">
+        What can BrowZee do for you?
+      </div>
+
+    <div id="inputContainer" class="visible">
+      <div class="input-left-group">
+        <!-- Mode selector button -->
+        <div class="mode-selector">
+          <button id="modeButton" class="mode-button" title="Select Task Mode">
+            <i class="fas fa-tasks"></i>
+          </button>
+          <div id="modeMenuDropdown" class="mode-menu-dropdown">
+            <div class="mode-item active" data-value="task">Agent Task</div>
+            <div class="mode-item" data-value="interactive-task">Interactive Agent Task</div>
+            <div class="mode-item" data-value="chat">Chat</div>
+            <div class="mode-item" data-value="chat-this-page">Chat on this Page</div>
+          </div>
+        </div>
+      </div>
+      
+      <textarea id="input" placeholder="Ask for anything"></textarea>
+      
+      <div class="input-right-group">
+        <button id="playPause" title="Start Task">
+          <i class="fas fa-rocket"></i>
+        </button>
+        <button id="stop" title="Stop Task">
+          <i class="fas fa-hand-paper"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="output"></div>
+ 
+  <!-- Disclaimer Bar -->
+  <div id="disclaimerBar">
+    <span id="disclaimerText">Verify important information.</span>
+    <a href="#" onclick="return false;">Learn more</a>
+  </div>
+ 
+  <!-- Processing Indicator -->
+  <div class="processing-indicator">
+    <i class="fas fa-circle-notch fa-spin processing-icon"></i>
+    <span>Processing your request</span>
+    <div class="typing-animation">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    </div>
+  </div>
+
+  <!-- Keep the hidden select for the server API -->
+  <select id="modeSelect" style="display: none;">
+    <option value="task" selected>Agent Task</option>
+    <option value="interactive-task">Interactive Agent Task</option>
+    <option value="chat">Chat</option>
+    <option value="chat-this-page">Chat on this Page</option>
+  </select>
+
+  <!-- Only use external script file - no inline JS -->
+  <script src="index.js"></script>
+</body>
+</html>
