@@ -839,23 +839,24 @@ document.addEventListener('DOMContentLoaded', () => {
   feedbackIndicator.style.zIndex = '10001';
   document.body.appendChild(feedbackIndicator);
 
-  function updateFeedbackIndicator(status) {
-    switch (status) {
-      case 'connected':
-        feedbackIndicator.textContent = '🟢 מחובר';
-        feedbackIndicator.style.backgroundColor = '#10b981';
-        break;
-      case 'waiting':
-        feedbackIndicator.textContent = '🟡 ממתין לשרת autocomplete';
-        feedbackIndicator.style.backgroundColor = '#f59e0b';
-        break;
-      case 'error':
-        feedbackIndicator.textContent = '🔴 שגיאה';
-        feedbackIndicator.style.backgroundColor = '#ef4444';
-        break;
-    }
-  }
+  // Commenting out the updateFeedbackIndicator function temporarily
+  // function updateFeedbackIndicator(status) {
+  //   switch (status) {
+  //     case 'connected':
+  //       feedbackIndicator.textContent = '🟢 מחובר';
+  //       feedbackIndicator.style.backgroundColor = '#10b981';
+  //       break;
+  //     case 'waiting':
+  //       feedbackIndicator.textContent = '🟡 ממתין לשרת autocomplete';
+  //       feedbackIndicator.style.backgroundColor = '#f59e0b';
+  //       break;
+  //     case 'error':
+  //       feedbackIndicator.textContent = '🔴 שגיאה';
+  //       feedbackIndicator.style.backgroundColor = '#ef4444';
+  //       break;
+  //   }
+  // }
 
   // Example usage
-  updateFeedbackIndicator('connected');
+  // updateFeedbackIndicator('connected');
 }); 

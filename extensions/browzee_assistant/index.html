@@ -222,20 +222,23 @@
       display: flex;
       align-items: center;
       z-index: 9999;
+      transition: none !important;
       backdrop-filter: blur(10px);
       box-sizing: border-box;
       justify-content: space-between;
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
     }
 
     .chat-active #inputContainer {
-      transform: translate(-50%, calc(100vh - 100% - 75px));
+      position: fixed;
       bottom: 15px;
-      top: auto;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 95%;
+      max-width: 600px;
+      background-color: var(--panel);
+      z-index: 10000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      margin-bottom: 56px;
     }
 
     .input-left-group {
@@ -249,6 +252,8 @@
     .input-right-group {
       display: flex;
       align-items: center;
+      gap: 16px;
+      margin-left: 16px;
     }
 
     #input {
@@ -315,6 +320,8 @@
       height: 32px;
       border-radius: 50%;
       font-size: 14px;
+      margin-left: 0;
+      margin-right: 0;
     }
    
     #playPause {
@@ -578,7 +585,6 @@
     #playPause, #stop {
       position: relative;
       transition: all 0.25s ease;
-      margin-left: 4px;
     }
    
     /* Utility class to create a container for action buttons with equal spacing */
@@ -830,6 +836,7 @@
       display: flex;
       align-items: center;
       z-index: 9999;
+      transition: none !important;
       backdrop-filter: blur(10px);
       box-sizing: border-box;
       justify-content: space-between;
