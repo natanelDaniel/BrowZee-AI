@@ -1,31 +1,20 @@
 {
+  "name": "BrowZee Working",
+  "version": "1.0",
   "manifest_version": 3,
-  "name": "BrowZee Assistant",
-  "version": "1.0.0",
-  "description": "Smart AI Assistant with Gemini-powered autocomplete",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "background"
-  ],
+  "description": "Native side-panel AI assistant for BrowZee",
+  "icons": { "32": "icon32.png", "128": "icon128.png" },
+  "action": { "default_title": "Ask BrowZee" },
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "permissions": ["storage", "tabs", "scripting", "sidePanel", "http://localhost:8000/", "http://127.0.0.1:8000/", "webRequest", "webRequestBlocking"],
   "host_permissions": [
-    "http://localhost:8010/*"
+    "http://127.0.0.1:8000/*",
+    "ws://127.0.0.1:8000/*"
   ],
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
-  "action": {
-    "default_popup": "index.html",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
-  },
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+  "background": { "service_worker": "bg.js" },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' http://localhost:8000 ws://localhost:8000 http://127.0.0.1:8000 ws://127.0.0.1:8000"
   }
 } 

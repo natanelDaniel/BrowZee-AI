@@ -24,9 +24,6 @@
       --error: #ef4444;
       --info: #3b82f6;
       --border: rgba(255, 255, 255, 0.1);
-      --purple-light: #d8b4fe;
-      --purple-medium: #8b5cf6;
-      --teal-light: #84acb6;
     }
 
     /* Planet animation styles - smaller for side panel */
@@ -34,7 +31,7 @@
       position: relative;
       width: 160px;
       height: 160px;
-      margin: 0 auto 20px;
+      margin: 0 auto 10px;
     }
 
     #planet {
@@ -45,55 +42,37 @@
       height: 100px;
       margin-top: -50px;
       margin-left: -50px;
+      background: radial-gradient(circle at 30% 30%, #a78bfa, #8b5cf6);
       border-radius: 50%;
-      background: radial-gradient(circle at 40% 30%, var(--purple-light), var(--purple-medium) 80%, #4c1d95 100%);
-      box-shadow:
-        inset 0 0 40px rgba(255, 255, 255, 0.3),
-        0 0 60px rgba(139, 92, 246, 0.45),
-        0 0 120px rgba(139, 92, 246, 0.25);
-      animation: planetGlow 5s ease-in-out infinite;
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
       z-index: 10;
     }
 
-    @keyframes planetGlow {
-      0%,100% {
-        transform: scale(1);
-        box-shadow:
-          inset 0 0 40px rgba(255, 255, 255, 0.25),
-          0 0 60px rgba(139, 92, 246, 0.45),
-          0 0 120px rgba(139, 92, 246, 0.25);
-      }
-      50% {
-        transform: scale(1.03);
-        box-shadow:
-          inset 0 0 60px rgba(255, 255, 255, 0.35),
-          0 0 85px rgba(139, 92, 246, 0.65),
-          0 0 140px rgba(139, 92, 246, 0.35);
-      }
-    }
-
-    .orbit {
+    .orbit-wrapper {
       position: absolute;
-      inset: 0;
-      transform-origin: 50% 50%;
-      animation: orbitRotate linear infinite;
-    }
-
-    @keyframes orbitRotate {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
+      top: 50%;
+      left: 50%;
+      transform-origin: center;
+      animation-name: rotate;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
     }
 
     .star {
       position: absolute;
       border-radius: 50%;
-      background: var(--purple-light);
-      animation: starShimmer 4s ease-in-out infinite;
+      animation: shimmer 4s ease-in-out infinite;
+      transition: z-index 0.3s, opacity 0.3s, filter 0.3s;
     }
 
-    @keyframes starShimmer {
-      0%,100% { opacity: 0.7; transform: scale(1); }
-      50%     { opacity: 1;   transform: scale(1.25); }
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     /* Make the planet container disappear in chat mode */
@@ -213,8 +192,8 @@
     }
 
     #inputContainer {
-      width: 95%;
-      max-width: 600px;
+      width: calc(100% - 10px);
+      max-width: 100%;
       background-color: var(--panel);
       border-radius: 12px;
       padding: 8px 10px;
@@ -222,7 +201,8 @@
       display: flex;
       align-items: center;
       z-index: 9999;
-      transition: none !important;
+      transition: all 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      margin-bottom: 0;
       backdrop-filter: blur(10px);
       box-sizing: border-box;
       justify-content: space-between;
@@ -231,14 +211,12 @@
     .chat-active #inputContainer {
       position: fixed;
       bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 95%;
-      max-width: 600px;
+      left: 0;
+      right: 0;
+      margin: 0 5px;
       background-color: var(--panel);
       z-index: 10000;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
-      margin-bottom: 56px;
     }
 
     .input-left-group {
@@ -252,8 +230,6 @@
     .input-right-group {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-left: 16px;
     }
 
     #input {
@@ -274,8 +250,6 @@
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
       transition: all 0.3s ease;
       outline: none;
-      width: 100%;
-      box-sizing: border-box;
     }
 
     #input:focus {
@@ -320,8 +294,6 @@
       height: 32px;
       border-radius: 50%;
       font-size: 14px;
-      margin-left: 0;
-      margin-right: 0;
     }
    
     #playPause {
@@ -498,21 +470,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 12px;
+      padding: 2px 8px;
       background: rgba(20, 25, 35, 0.5);
       color: #9ca3af;
-      font-size: 12px;
+      font-size: 9px;
       z-index: 9995;
       backdrop-filter: blur(5px);
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       text-align: center;
-      height: auto;
-      min-height: 32px;
+      height: 14px;
       box-sizing: border-box;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: none !important;
     }
 
     body.light-mode #disclaimerBar {
@@ -522,69 +492,28 @@
     }
 
     #disclaimerText {
-      max-width: 85%;
+      max-width: 75%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-weight: 500;
     }
 
     #disclaimerBar a {
       color: #8b5cf6;
       text-decoration: none;
-      margin-left: 6px;
-      font-size: 12px;
-      font-weight: 500;
+      margin-left: 3px;
+      font-size: 9px;
     }
    
     #disclaimerBar a:hover {
       text-decoration: underline;
     }
 
-    /* Responsive adjustments for disclaimer bar */
-    @media (max-width: 320px) {
-      #disclaimerBar {
-        font-size: 11px;
-        padding: 6px 10px;
-        min-height: 28px;
-      }
-      
-      #disclaimerBar a {
-        font-size: 11px;
-        margin-left: 4px;
-      }
-    }
-
-    @media (min-width: 321px) and (max-width: 480px) {
-      #disclaimerBar {
-        font-size: 12px;
-        padding: 7px 11px;
-        min-height: 30px;
-      }
-      
-      #disclaimerBar a {
-        font-size: 12px;
-        margin-left: 5px;
-      }
-    }
-
-    @media (min-width: 481px) {
-      #disclaimerBar {
-        font-size: 13px;
-        padding: 8px 12px;
-        min-height: 32px;
-      }
-      
-      #disclaimerBar a {
-        font-size: 13px;
-        margin-left: 6px;
-      }
-    }
-
     /* Action buttons tooltips - more visible */
     #playPause, #stop {
       position: relative;
       transition: all 0.25s ease;
+      margin-left: 4px;
     }
    
     /* Utility class to create a container for action buttons with equal spacing */
@@ -643,59 +572,59 @@
       transform: scale(0.9);
     }
 
-    /* Responsive layout for different screen sizes */
+    /* Responsive layout for narrow side panel */
     @media (max-width: 320px) {
-      #planetSystem {
-        width: 140px;
-        height: 140px;
-      }
-      
-      #planet {
-        width: 80px;
-        height: 80px;
-        margin-top: -40px;
-        margin-left: -40px;
-      }
-      
-      #welcomeMessage {
-        font-size: 20px;
+      #inputContainer {
+        padding: 6px 8px;
       }
       
       #input {
         min-height: 34px;
         font-size: 12px;
         padding: 6px 8px;
+        margin: 0 6px;
+      }
+      
+      #playPause, #stop, .mode-button {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+      }
+      
+      .mode-menu-dropdown {
+        width: 170px;
+        top: auto;
+      }
+      
+      .mode-item {
+        padding: 8px 10px;
+        font-size: 12px;
       }
     }
     
     @media (min-width: 321px) and (max-width: 350px) {
-      #planetSystem {
-        width: 150px;
-        height: 150px;
-      }
-      
-      #planet {
-        width: 90px;
-        height: 90px;
-        margin-top: -45px;
-        margin-left: -45px;
-      }
-      
-      #welcomeMessage {
-        font-size: 22px;
+      #inputContainer {
+        padding: 6px 8px;
       }
       
       #input {
         min-height: 36px;
         font-size: 13px;
         padding: 7px 9px;
+        margin: 0 6px;
+      }
+      
+      #playPause, #stop, .mode-button {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
       }
     }
     
-    @media (min-width: 351px) {
+    @media (min-width: 351px) and (max-width: 600px) {
       #planetSystem {
-        width: 160px;
-        height: 160px;
+        width: 180px;
+        height: 180px;
       }
       
       #planet {
@@ -706,13 +635,101 @@
       }
       
       #welcomeMessage {
-        font-size: 24px;
+        font-size: 22px;
+      }
+      
+      .button i {
+        font-size: 12px;
+      }
+      
+      #playPause, #stop {
+        width: 28px;
+        height: 28px;
+      }
+    }
+    
+    @media (min-width: 601px) {
+      #planetSystem {
+        width: 200px;
+        height: 200px;
+      }
+      
+      #planet {
+        width: 120px;
+        height: 120px;
+        margin-top: -60px;
+        margin-left: -60px;
+      }
+      
+      #welcomeMessage {
+        font-size: 28px;
+      }
+      
+      .button i {
+        font-size: 14px;
+      }
+      
+      #playPause, #stop {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    /* Add responsive styles for disclaimer bar */
+    @media (max-width: 350px) {
+      #disclaimerBar {
+        font-size: 8px;
+        padding: 1px 4px;
+        height: 12px;
+      }
+      
+      #disclaimerText {
+        max-width: 70%;
+      }
+      
+      #disclaimerBar a {
+        font-size: 8px;
+        margin-left: 2px;
+      }
+      
+      .chat-active #inputContainer {
+        bottom: 14px;
+      }
+      
+      #inputContainer {
+        padding: 4px 6px;
+        background-color: var(--panel);
       }
       
       #input {
-        min-height: 38px;
-        font-size: 14px;
-        padding: 8px 12px;
+        min-height: 26px;
+        font-size: 12px;
+        padding: 4px 5px;
+        margin-right: 2px;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      body.light-mode #inputContainer {
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+      
+      body.light-mode #input {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+      
+      .action-buttons-container {
+        transform: scale(0.9);
+        margin-right: -2px;
+      }
+      
+      #playPause, #stop {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+      }
+      
+      #output {
+        padding-bottom: 80px;
       }
     }
 
@@ -759,12 +776,6 @@
       overflow: hidden;
     }
     
-    /* Make dropdown appear above in chat mode */
-    .chat-active .mode-menu-dropdown {
-      bottom: 45px;
-      top: auto;
-    }
-    
     .mode-menu-dropdown.show {
       display: block;
     }
@@ -785,287 +796,6 @@
       color: var(--primary);
       font-weight: 500;
     }
-
-    /* Responsive design - using viewport units */
-    #planetSystem {
-      position: relative;
-      width: 160px;
-      height: 160px;
-      margin: 0 auto 20px;
-    }
-
-    #planet {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 100px;
-      height: 100px;
-      margin-top: -50px;
-      margin-left: -50px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 40% 30%, var(--purple-light), var(--purple-medium) 80%, #4c1d95 100%);
-      box-shadow:
-        inset 0 0 40px rgba(255, 255, 255, 0.3),
-        0 0 60px rgba(139, 92, 246, 0.45),
-        0 0 120px rgba(139, 92, 246, 0.25);
-      animation: planetGlow 5s ease-in-out infinite;
-      z-index: 10;
-    }
-
-    #welcomeMessage {
-      text-align: center;
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 20px;
-      animation: fadeSlideIn 1.2s ease-out forwards;
-      transition: opacity 0.5s ease-out;
-      padding: 0 5px;
-      white-space: normal;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    #inputContainer {
-      width: 95%;
-      max-width: 600px;
-      background-color: var(--panel);
-      border-radius: 12px;
-      padding: 8px 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      display: flex;
-      align-items: center;
-      z-index: 9999;
-      transition: none !important;
-      backdrop-filter: blur(10px);
-      box-sizing: border-box;
-      justify-content: space-between;
-    }
-
-    .chat-active #inputContainer {
-      position: fixed;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 95%;
-      max-width: 600px;
-      background-color: var(--panel);
-      z-index: 10000;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
-      margin-bottom: 56px;
-    }
-
-    /* Responsive layout for different screen sizes */
-    @media (max-width: 320px) {
-      #planetSystem {
-        width: 140px;
-        height: 140px;
-      }
-      
-      #planet {
-        width: 80px;
-        height: 80px;
-        margin-top: -40px;
-        margin-left: -40px;
-      }
-      
-      #welcomeMessage {
-        font-size: 20px;
-      }
-      
-      #input {
-        min-height: 34px;
-        font-size: 12px;
-        padding: 6px 8px;
-      }
-    }
-    
-    @media (min-width: 321px) and (max-width: 350px) {
-      #planetSystem {
-        width: 150px;
-        height: 150px;
-      }
-      
-      #planet {
-        width: 90px;
-        height: 90px;
-        margin-top: -45px;
-        margin-left: -45px;
-      }
-      
-      #welcomeMessage {
-        font-size: 22px;
-      }
-      
-      #input {
-        min-height: 36px;
-        font-size: 13px;
-        padding: 7px 9px;
-      }
-    }
-    
-    @media (min-width: 351px) {
-      #planetSystem {
-        width: 160px;
-        height: 160px;
-      }
-      
-      #planet {
-        width: 100px;
-        height: 100px;
-        margin-top: -50px;
-        margin-left: -50px;
-      }
-      
-      #welcomeMessage {
-        font-size: 24px;
-      }
-      
-      #input {
-        min-height: 38px;
-        font-size: 14px;
-        padding: 8px 12px;
-      }
-    }
-
-    /* Smart Autocomplete styles */
-    .autocomplete-container {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 0;
-      right: 0;
-      background-color: rgba(31, 41, 55, 0.95);
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 10001;
-      max-height: 300px;
-      overflow-y: auto;
-      display: none;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      margin: 0;
-      width: 100%;
-      backdrop-filter: blur(8px);
-    }
-
-    .autocomplete-container.visible {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .autocomplete-item {
-      padding: 12px 16px;
-      cursor: pointer;
-      color: var(--text);
-      line-height: 1.5;
-      transition: all 0.2s ease;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .autocomplete-item:last-child {
-      border-bottom: none;
-    }
-
-    .autocomplete-item .title {
-      font-weight: 600;
-      color: var(--text);
-      font-size: 16px;
-      font-family: 'Inter', sans-serif;
-      line-height: 1.4;
-    }
-
-    .autocomplete-item .subtitle {
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.6);
-      opacity: 0.8;
-      font-family: 'Inter', sans-serif;
-      line-height: 1.4;
-      margin-top: 2px;
-    }
-
-    .autocomplete-item:hover,
-    .autocomplete-item.selected {
-      background-color: rgba(255, 255, 255, 0.08);
-    }
-
-    /* Loading indicator */
-    .autocomplete-loading {
-      display: none;
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--subtle);
-    }
-
-    .autocomplete-loading.visible {
-      display: block;
-    }
-
-    /* Light mode adjustments */
-    body.light-mode .autocomplete-container {
-      background-color: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    body.light-mode .autocomplete-item {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    body.light-mode .autocomplete-item:hover,
-    body.light-mode .autocomplete-item.selected {
-      background-color: rgba(0, 0, 0, 0.03);
-    }
-
-    body.light-mode .autocomplete-item .subtitle {
-      color: rgba(0, 0, 0, 0.6);
-    }
-
-    /* Input wrapper adjustments */
-    .input-wrapper {
-      position: relative;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 320px) {
-      .autocomplete-container {
-        bottom: calc(100% + 6px);
-      }
-      
-      .autocomplete-item {
-        padding: 10px 14px;
-      }
-      
-      .autocomplete-item .title {
-        font-size: 15px;
-      }
-      
-      .autocomplete-item .subtitle {
-        font-size: 12px;
-      }
-    }
-    
-    @media (min-width: 321px) and (max-width: 480px) {
-      .autocomplete-container {
-        bottom: calc(100% + 7px);
-      }
-      
-      .autocomplete-item {
-        padding: 11px 15px;
-      }
-    }
   </style>
 </head>
 <body class="initial-screen light-mode">
@@ -1082,7 +812,7 @@
       </div>
 
       <div id="welcomeMessage">
-        What can Browzee do for you?
+        What can BrowZee do for you?
       </div>
 
     <div id="inputContainer" class="visible">
@@ -1101,12 +831,7 @@
         </div>
       </div>
       
-      <div class="input-wrapper">
-        <textarea id="input" placeholder="Ask for anything"></textarea>
-        <div id="autocompleteContainer" class="autocomplete-container">
-          <!-- Autocomplete items will be dynamically added here -->
-        </div>
-      </div>
+      <textarea id="input" placeholder="Ask for anything"></textarea>
       
       <div class="input-right-group">
         <button id="playPause" title="Start Task">
@@ -1148,91 +873,5 @@
 
   <!-- Only use external script file - no inline JS -->
   <script src="index.js"></script>
-  
-  <!-- Planet animation script -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const scene = document.getElementById('planetSystem');
-      const planetElement = document.getElementById('planet');
-      
-      // Calculate dimensions based on the scene size
-      const updateStars = () => {
-        // Remove all .orbit elements (stars) except the planet itself
-        Array.from(scene.children).forEach(child => {
-          if (child !== planetElement) {
-            scene.removeChild(child);
-          }
-        });
-        
-        // Get updated dimensions
-        const sceneRect = scene.getBoundingClientRect();
-        const sceneSize = Math.min(sceneRect.width, sceneRect.height);
-        const planetRect = planetElement.getBoundingClientRect();
-        const planetSize = Math.min(planetRect.width, planetRect.height);
-        
-        // Constants for star generation
-        const PLANET_R = planetSize / 2;
-        const BUFFER = 15;
-        const MIN_R = PLANET_R + BUFFER;
-        const MAX_R = (sceneSize / 1.5);
-        const STAR_COUNT = 45;
-        
-        const palette = [
-          'var(--purple-light)',
-          'var(--purple-medium)',
-          'var(--teal-light)',
-          '#ffffffb8',
-        ];
-        
-        // Create stars
-        for (let i = 0; i < STAR_COUNT; i++) {
-          // Wrapper that rotates the star around the center
-          const orbit = document.createElement('div');
-          orbit.className = 'orbit';
-          orbit.style.animationDuration = `${5 + Math.random() * 20}s`;
-          
-          // The star itself
-          const star = document.createElement('div');
-          star.className = 'star';
-          
-          // Size between 3px and 8px
-          const size = 3 + Math.random() * 5;
-          star.style.width = `${size}px`;
-          star.style.height = `${size}px`;
-          
-          const color = palette[Math.floor(Math.random() * palette.length)];
-          star.style.background = color;
-          if (Math.random() > 0.7) {
-            star.style.boxShadow = `0 0 ${size * 1.5}px ${color}`;
-          }
-          
-          // Even angle, random distance
-          const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~2.4 radians
-          const angle = i * goldenAngle;
-          // מרחק אקראי בטווח המותר
-          const radius = MIN_R + Math.random() * (MAX_R - MIN_R);
-          
-          const x = Math.cos(angle) * radius;
-          const y = Math.sin(angle) * radius;
-          
-          star.style.left = `calc(50% + ${x}px)`;
-          star.style.top = `calc(50% + ${y}px)`;
-          
-          orbit.appendChild(star);
-          scene.appendChild(orbit);
-        }
-      };
-      
-      // Initial update
-      updateStars();
-      
-      // Update on resize with debounce
-      let resizeTimeout;
-      window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(updateStars, 250);
-      });
-    });
-  </script>
 </body>
 </html>

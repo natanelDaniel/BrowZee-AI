@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  gmail-mcp:
+    image: ghcr.io/gongrzhe/gmail-mcp-server:latest
+    container_name: gmail-mcp
+    restart: unless-stopped
+    ports:
+      - "8080:3000"          # MCP נחשף על 8080
+    volumes:
+      - gmail_data:/gmail-server            # credentials.json יישמר פה
+      - ./gcp-oauth.keys.json:/gcp-oauth.keys.json:ro
+    environment:
+      - GMAIL_OAUTH_PATH=/gcp-oauth.keys.json
+      - GMAIL_CREDENTIALS_PATH=/gmail-server/credentials.json
+volumes:
+  gmail_data:

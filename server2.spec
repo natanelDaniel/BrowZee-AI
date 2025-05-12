@@ -5,7 +5,7 @@ a = Analysis(
     ['server2.py'],
     pathex=[],
     binaries=[],
-    datas=[('browzee_agent/agent/system_prompt.md', 'browzee_agent/agent'), ('browzee_agent/dom/buildDomTree.js', 'browzee_agent/dom')],
+    datas=[('browzee_agent/agent/system_prompt.md', 'browzee_agent/agent'), ('browzee_agent/dom/buildDomTree.js', 'browzee_agent/dom'), ('C:/Users/21dan/chromium_ai_browser/main_gui.html', '.')],
     hiddenimports=['pydantic', 'playwright', 'PIL', 'posthog', 'PIL.Image', 'selenium', 'pydantic-core', 'pydantic.deprecated.decorator'],
     hookspath=[],
     hooksconfig={},
