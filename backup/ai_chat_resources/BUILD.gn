@@ -1,9 +1,0 @@
-import("//tools/grit/grit_rule.gni")
-
-grit("ai_chat_resources") {
-  source = "ai_chat_resources.grd"
-  outputs = [
-    "grit/ai_chat_resources.h",
-    "ai_chat_resources.pak",
-  ]
-}
