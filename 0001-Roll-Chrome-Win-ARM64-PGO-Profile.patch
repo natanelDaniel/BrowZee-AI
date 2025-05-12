@@ -1,0 +1,43 @@
+From 15bc01b1b397339c3a84905de7f0fb084ef00a92 Mon Sep 17 00:00:00 2001
+From: chromium-autoroll
+ <chromium-autoroll@skia-public.iam.gserviceaccount.com>
+Date: Sun, 11 May 2025 12:55:41 -0700
+Subject: [PATCH] Roll Chrome Win ARM64 PGO Profile
+
+Roll Chrome Win ARM64 PGO profile from chrome-win-arm64-main-1746942906-d614e84e9c9b04a8237dd2f6be03ac536d247f7b-e15ffbc3a8880afa389d0513a52428ea5d8e7eb2.profdata to chrome-win-arm64-main-1746985189-8edb41051cac92e2d5b1c31fea5120f346ce4459-e6e04c7e51c7d34eadc1c8854bccd6e24a1fd98a.profdata
+
+If this roll has caused a breakage, revert this CL and stop the roller
+using the controls here:
+https://autoroll.skia.org/r/pgo-win-arm64-chromium
+Please CC chrome-brapp-engprod@google.com,pgo-profile-sheriffs@google.com on the revert to ensure that a human
+is aware of the problem.
+
+To file a bug in Chromium main branch: https://bugs.chromium.org/p/chromium/issues/entry
+
+To report a problem with the AutoRoller itself, please file a bug:
+https://issues.skia.org/issues/new?component=1389291&template=1850622
+
+Documentation for the AutoRoller is here:
+https://skia.googlesource.com/buildbot/+doc/main/autoroll/README.md
+
+Tbr: pgo-profile-sheriffs@google.com
+Merge-Approval-Bypass: Chrome autoroller
+Change-Id: Id78451bb96d68c29f86ba38690f61a5e3470595a
+Reviewed-on: https://chromium-review.googlesource.com/c/chromium/src/+/6535239
+Commit-Queue: chromium-autoroll <chromium-autoroll@skia-public.iam.gserviceaccount.com>
+Bot-Commit: chromium-autoroll <chromium-autoroll@skia-public.iam.gserviceaccount.com>
+Cr-Commit-Position: refs/heads/main@{#1458622}
+---
+ chrome/build/win-arm64.pgo.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/chrome/build/win-arm64.pgo.txt b/chrome/build/win-arm64.pgo.txt
+index cc9df02a8fcd3..a89b4177209de 100644
+--- a/chrome/build/win-arm64.pgo.txt
++++ b/chrome/build/win-arm64.pgo.txt
+@@ -1 +1 @@
+-chrome-win-arm64-main-1746942906-d614e84e9c9b04a8237dd2f6be03ac536d247f7b-e15ffbc3a8880afa389d0513a52428ea5d8e7eb2.profdata
++chrome-win-arm64-main-1746985189-8edb41051cac92e2d5b1c31fea5120f346ce4459-e6e04c7e51c7d34eadc1c8854bccd6e24a1fd98a.profdata
+-- 
+2.43.0.windows.1
+
