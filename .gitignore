@@ -1,0 +1,46 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Build artifacts
+*.dll
+*.so
+*.dylib
+*.zip
+*.tar.gz
+*.7z
+*.pak
+*.bin
+*.log
+*.toc
+*.pkg
+*.pma
+*.manifest
+*.dat
+*.pb
+*.bak
+*.tmp
+
+# Build and dist folders
+build/
+dist/
+browzee_dist/
+
+# PyInstaller
+*.spec
+
+# VS Code and other IDEs
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+
+# Git LFS tracked separately
+.gitattributes
+
+# Sparse checkout artifacts (if any)
+.sparse-checkout
