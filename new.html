@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>browzee</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', 'San Francisco', Arial, sans-serif;
+      background: #fafbfc;
+      color: #181818;
+      min-height: 100vh;
+    }
+    .user-avatar {
+      position: fixed;
+      top: 28px;
+      right: 36px;
+      z-index: 100;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 8px 0 rgba(80, 80, 180, 0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      transition: box-shadow 0.2s;
+      padding: 0;
+    }
+    .user-avatar:hover {
+      box-shadow: 0 4px 16px 0 rgba(80, 80, 180, 0.13);
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 0 20px;
+      box-sizing: border-box;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .greeting {
+      font-size: 2.2rem;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 24px;
+      margin-top: 0;
+      transition: color 0.2s;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+    .greeting .time {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .greeting .prompt {
+      display: block;
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: #555;
+    }
+    /* Planet animation styles - larger */
+    .planet-container {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      margin-bottom: 48px;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .planet {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle at 40% 30%, #d8b4fe, #8b5cf6 80%, #4c1d95);
+      border-radius: 50%;
+      box-shadow:
+        inset 0 0 40px rgba(255, 255, 255, 0.25),
+        0 0 60px rgba(139, 92, 246, 0.45),
+        0 0 120px rgba(139, 92, 246, 0.25);
+      margin: -80px 0 0 -80px;
+      z-index: 10;
+      animation: planet-glow 5s ease-in-out infinite;
+    }
+    @keyframes planet-glow {
+      0%, 100% {
+        box-shadow:
+          inset 0 0 40px rgba(255, 255, 255, 0.25),
+          0 0 60px rgba(139, 92, 246, 0.45),
+          0 0 120px rgba(139, 92, 246, 0.25);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow:
+          inset 0 0 60px rgba(255, 255, 255, 0.3),
+          0 0 80px rgba(139, 92, 246, 0.65),
+          0 0 140px rgba(139, 92, 246, 0.35);
+        transform: scale(1.03);
+      }
+    }
+    /* End of planet animation styles */
+    .actions {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      transition: all 0.3s ease;
+    }
+    .action-btn {
+      background: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      box-shadow: 0 2px 8px 0 rgba(80, 80, 180, 0.07);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .action-btn svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+      min-width: 22px;
+      transition: all 0.3s ease;
+    }
+    .action-btn:hover {
+      box-shadow: 0 4px 16px 0 rgba(80, 80, 180, 0.13);
+    }
+    .action-btn.expanded {
+      position: absolute;
+      width: 100%;
+      border-radius: 16px;
+      padding: 14px 24px;
+      box-shadow: 0 8px 30px rgba(80, 80, 180, 0.15);
+      z-index: 10;
+    }
+    .action-btn.expanded svg {
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+    }
+    .action-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .search-input {
+      border: none;
+      background: transparent;
+      font-size: 1.15rem;
+      font-weight: 400;
+      width: 100%;
+      padding: 0;
+      margin-left: 10px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      display: none;
+    }
+    .action-btn.expanded .search-input {
+      display: block;
+    }
+    .icon-row {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 40px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .icon-row.hidden {
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+    }
+    .icon-btn {
+      background: #fff;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px 0 rgba(80, 80, 180, 0.07);
+      border: none;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+      padding: 0;
+    }
+    .icon-btn:hover {
+      box-shadow: 0 4px 16px 0 rgba(80, 80, 180, 0.13);
+    }
+    .discover-section {
+      width: 100%;
+      max-width: 800px;
+      margin-top: 16px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .discover-section.hidden {
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+    }
+    .discover-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+      margin-left: 8px;
+      color: #222;
+    }
+    .discover-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: center;
+    }
+    .discover-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px 0 rgba(80, 80, 180, 0.07);
+      width: calc(25% - 14px);
+      min-width: 160px;
+      max-width: 200px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+    .discover-card:hover {
+      box-shadow: 0 4px 16px 0 rgba(80, 80, 180, 0.13);
+    }
+    .card-img {
+      width: 100%;
+      height: 90px;
+      background: #e6eaf3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-title {
+      padding: 14px 16px 16px 16px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #222;
+      flex: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .discover-card {
+        width: calc(50% - 10px);
+      }
+      .greeting {
+        font-size: 2rem;
+      }
+      .greeting .prompt {
+        font-size: 1.4rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .actions {
+        flex-direction: column;
+      }
+      .discover-card {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="user-avatar" title="User Profile">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="16" r="16" fill="#e6eaf3"/>
+      <circle cx="16" cy="13" r="6" fill="#b1c6ff"/>
+      <ellipse cx="16" cy="24" rx="8" ry="5" fill="#b1c6ff"/>
+    </svg>
+  </button>
+  <div class="container">
+    <div class="greeting" id="greeting"></div>
+    <div class="planet-container">
+      <div class="planet"></div>
+    </div>
+    <div class="actions" id="actions">
+      <button class="action-btn" id="findBtn" data-action="find">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#8b5cf6" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"/></svg>
+        Manual
+        <input type="text" class="search-input" placeholder="Search the web..." id="findInput">
+      </button>
+      <button class="action-btn" id="askBtn" data-action="ask">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="10" rx="5" stroke="#8b5cf6" stroke-width="2"/><circle cx="8" cy="12" r="1" fill="#8b5cf6"/><circle cx="12" cy="12" r="1" fill="#8b5cf6"/><circle cx="16" cy="12" r="1" fill="#8b5cf6"/></svg>
+        Ask
+        <input type="text" class="search-input" placeholder="Ask me anything..." id="askInput">
+      </button>
+      <button class="action-btn" id="doBtn" data-action="do">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12h16M12 4l8 8-8 8" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Do
+        <input type="text" class="search-input" placeholder="Enter a task..." id="doInput">
+      </button>
+    </div>
+    <div class="icon-row" id="iconRow">
+      <a href="https://youtube.com" class="icon-btn" title="YouTube">
+        <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#FF0000"/><polygon points="10,8 16,12 10,16" fill="#fff"/></svg>
+      </a>
+      <a href="https://google.com" class="icon-btn" title="Google">
+        <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#fff"/><text x="6" y="17" font-size="12" font-family="Arial" fill="#4285F4">G</text></svg>
+      </a>
+      <a href="https://gmail.com" class="icon-btn" title="Gmail">
+        <svg width="24" height="24" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="4" fill="#fff" stroke="#E0E0E0"/><polyline points="2,4 12,13 22,4" fill="none" stroke="#EA4335" stroke-width="2"/></svg>
+      </a>
+      <a href="https://reddit.com" class="icon-btn" title="Reddit">
+        <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#fff"/><circle cx="8.5" cy="13.5" r="2" fill="#FF4500"/><circle cx="15.5" cy="13.5" r="2" fill="#FF4500"/><ellipse cx="12" cy="17" rx="4" ry="2" fill="#FF4500"/></svg>
+      </a>
+      <a href="https://amazon.com" class="icon-btn" title="Amazon">
+        <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#fff"/><path d="M7 17c2 1.5 8 1.5 10 0" stroke="#FF9900" stroke-width="2" fill="none"/><text x="7" y="15" font-size="8" font-family="Arial" fill="#232F3E">a</text></svg>
+      </a>
+      <a href="https://wikipedia.org" class="icon-btn" title="Wikipedia">
+        <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#fff"/><text x="6" y="17" font-size="12" font-family="Georgia" fill="#000">W</text></svg>
+      </a>
+    </div>
+    <div class="discover-section" id="discoverSection">
+      <div class="discover-title">Discover</div>
+      <div class="discover-cards">
+        <div class="discover-card">
+          <div class="card-img">
+            <svg width="60" height="40" viewBox="0 0 60 40"><rect width="60" height="40" rx="8" fill="#b7d3c6"/><rect x="8" y="24" width="44" height="8" rx="2" fill="#fff"/><rect x="12" y="12" width="12" height="8" rx="2" fill="#fff"/></svg>
+          </div>
+          <div class="card-title">How to Travel on Budget.</div>
+        </div>
+        <div class="discover-card">
+          <div class="card-img">
+            <svg width="60" height="40" viewBox="0 0 60 40"><rect width="60" height="40" rx="8" fill="#a1b6d6"/><rect x="10" y="10" width="40" height="20" rx="4" fill="#fff"/><rect x="20" y="20" width="20" height="8" rx="2" fill="#b7d3c6"/></svg>
+          </div>
+          <div class="card-title">The Future of At Technology</div>
+        </div>
+        <div class="discover-card">
+          <div class="card-img">
+            <svg width="60" height="40" viewBox="0 0 60 40"><rect width="60" height="40" rx="8" fill="#e6b7c6"/><circle cx="30" cy="20" r="10" fill="#fff"/><rect x="25" y="15" width="10" height="10" rx="2" fill="#b7d3c6"/></svg>
+          </div>
+          <div class="card-title">10 Tips for Better Work Life...</div>
+        </div>
+        <div class="discover-card">
+          <div class="card-img">
+            <svg width="60" height="40" viewBox="0 0 60 40"><rect width="60" height="40" rx="8" fill="#b7c6d3"/><rect x="8" y="24" width="44" height="8" rx="2" fill="#fff"/><rect x="20" y="10" width="20" height="8" rx="2" fill="#e6b7c6"/></svg>
+          </div>
+          <div class="card-title">Stock Market Highlights</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Dynamic greeting based on time of day - in two lines and modern style
+    function getGreeting() {
+      const now = new Date();
+      const hour = now.getHours();
+      let timeOfDay = 'Hello';
+      if (hour >= 5 && hour < 12) timeOfDay = 'Morning';
+      else if (hour >= 12 && hour < 18) timeOfDay = 'Afternoon';
+      else if (hour >= 18 && hour < 22) timeOfDay = 'Evening';
+      else timeOfDay = 'Night';
+      
+      const greetingEl = document.getElementById('greeting');
+      greetingEl.innerHTML = '<span class="time">${timeOfDay}, Noam.</span><span class="prompt">Ready to explore?</span>';
+    }
+    
+    // Initialize greeting
+    getGreeting();
+    
+    // Action buttons functionality
+    const actionBtns = document.querySelectorAll('.action-btn');
+    const iconRow = document.getElementById('iconRow');
+    const discoverSection = document.getElementById('discoverSection');
+    const findInput = document.getElementById('findInput');
+    const askInput = document.getElementById('askInput');
+    const doInput = document.getElementById('doInput');
+    
+    actionBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.getAttribute('data-action');
+        
+        // Reset all buttons first
+        actionBtns.forEach(b => {
+          if (b !== btn) {
+            b.classList.add('hidden');
+            b.classList.remove('expanded');
+          }
+        });
+        
+        // Expand current button
+        btn.classList.add('expanded');
+        
+        // Hide other sections
+        iconRow.classList.add('hidden');
+        discoverSection.classList.add('hidden');
+        
+        // Focus the input
+        const input = btn.querySelector('.search-input');
+        setTimeout(() => {
+          input.focus();
+        }, 300);
+        
+        // Add event listener for Escape key to restore original view
+        document.addEventListener('keydown', handleEscape);
+      });
+    });
+    
+    // Handle Escape key to restore original view
+    function handleEscape(e) {
+      if (e.key === 'Escape') {
+        resetUI();
+        document.removeEventListener('keydown', handleEscape);
+      }
+    }
+    
+    // Handle clicks outside of expanded button to restore original view
+    document.addEventListener('click', (e) => {
+      const expandedBtn = document.querySelector('.action-btn.expanded');
+      if (expandedBtn && !expandedBtn.contains(e.target)) {
+        resetUI();
+      }
+    });
+    
+    // Reset UI to original state
+    function resetUI() {
+      actionBtns.forEach(btn => {
+        btn.classList.remove('expanded');
+        btn.classList.remove('hidden');
+      });
+      
+      iconRow.classList.remove('hidden');
+      discoverSection.classList.remove('hidden');
+      
+      // Clear inputs
+      findInput.value = '';
+      askInput.value = '';
+      doInput.value = '';
+    }
+    
+    // Form submission handling
+    const findBtn = document.getElementById('findBtn');
+    const askBtn = document.getElementById('askBtn');
+    const doBtn = document.getElementById('doBtn');
+    
+    // Handle Find search
+    findInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && findInput.value.trim() !== '') {
+        window.location.href = 'https://www.google.com/search?q=${encodeURIComponent(findInput.value)}';
+      }
+    });
+    
+    // Handle Ask search
+    askInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && askInput.value.trim() !== '') {
+        // Example: could redirect to AI chat service
+        window.location.href = 'https://www.google.com/search?q=${encodeURIComponent(askInput.value)}';
+      }
+    });
+    
+    // Handle Do search
+    doInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && doInput.value.trim() !== '') {
+        // Example: could redirect to task service
+        alert('Task added: ${doInput.value}');
+        resetUI();
+      }
+    });
+  </script>
+</body>
+</html>
