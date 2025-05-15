@@ -165,13 +165,35 @@
                 const task = match[1].trim();
                 if (task) taskList.push(task);
             }
-            html += `<div style=\"margin-top:2em;\"><b>Suggested Next Steps:</b><div style=\"display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;\">`;
-            for (const task of taskList) {
-                html += `<div style=\"background:#e0e7ef;padding:16px 18px;border-radius:10px;box-shadow:0 1px 4px rgba(60,60,120,0.08);min-width:220px;flex:1 1 220px;\">${task}</div>`;
+            html += `<div style=\"margin-top:2em;\"><b>Suggested Next Steps:</b><div id=\"task-panels\" style=\"display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;\">`;
+            for (let i = 0; i < taskList.length; i++) {
+                const task = taskList[i];
+                html += `<div class=\"task-panel\" data-task=\"${encodeURIComponent(task)}\" style=\"background:#e0e7ef;padding:16px 18px;border-radius:10px;box-shadow:0 1px 4px rgba(60,60,120,0.08);min-width:220px;flex:1 1 220px;cursor:pointer;transition:background 0.2s;\">${task}</div>`;
             }
             html += `</div></div>`;
         }
         resultDiv.innerHTML = html;
+
+        // Add click handlers to each task panel
+        const panels = document.querySelectorAll('.task-panel');
+        panels.forEach(panel => {
+            panel.onclick = async function() {
+                const taskText = decodeURIComponent(this.getAttribute('data-task'));
+                this.style.background = '#c7d2fe';
+                this.innerHTML = 'Running task...';
+                try {
+                    const resp = await fetch('http://127.0.0.1:8000/run-task', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ task: taskText, mode: 'task' })
+                    });
+                    const data = await resp.json();
+                    this.innerHTML = 'Task triggered!';
+                } catch (e) {
+                    this.innerHTML = 'Error triggering task.';
+                }
+            };
+        });
     }
 
     document.getElementById("searchForm").onsubmit = async function(e) {
