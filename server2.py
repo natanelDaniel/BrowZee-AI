@@ -9,7 +9,7 @@ from langchain_openai import ChatOpenAI
 from browzee_agent import Agent
 from browzee_agent import BrowserConfig
 from browzee_agent import Browser
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from typing import Optional
 from typing_extensions import Annotated, TypedDict
 import asyncio
@@ -25,6 +25,7 @@ from langgraph.prebuilt import create_react_agent
 from langgraph.store.memory import InMemoryStore
 from langmem import create_manage_memory_tool, create_search_memory_tool
 from browzee_agent.app_services import app, send_to_websockets, websocket_endpoint
+import requests
 active_agent = None
 
 class TaskRequest(BaseModel):
@@ -173,6 +174,21 @@ async def run_task(request: TaskRequest):
         await send_to_websockets(result)
         return result
 
+@app.post("/search-proxy")
+async def search_proxy(request: dict):
+    """
+    Proxy endpoint that forwards requests to search_agent.py's /search endpoint.
+    This works around CSP restrictions in Chrome.
+    """
+    try:
+        # Forward the request to search_agent.py
+        response = requests.post("http://localhost:5000/search", json=request)
+        return JSONResponse(content=response.json(), status_code=response.status_code)
+    except Exception as e:
+        return JSONResponse(
+            content={"answer": f"Error: {str(e)}"},
+            status_code=500
+        )
 
 # הרצה (אם תרצה)
 # uvicorn ai_server:app --host 0.0.0.0 --port 8000

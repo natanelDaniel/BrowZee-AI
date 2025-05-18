@@ -1,0 +1,108 @@
+{
+  "format_version": "1.1",
+  "package_name": "infra/rbe/client/windows-amd64",
+  "install_mode": "copy",
+  "actual_install_mode": "copy",
+  "files": [
+    {
+      "name": "CHANGELOG.md",
+      "size": 134325,
+      "hash": "QP5SlTz7DeNPCeNKj67W_8UDeXv7LfpcsE9Z1ijLIREC"
+    },
+    {
+      "name": "LICENSE",
+      "size": 11560,
+      "hash": "Pd-b5cKP4n2tFDpdx27qJSIq0d1ok0oEcGTlbtL6QMUC"
+    },
+    {
+      "name": "NOTICE",
+      "size": 9395,
+      "hash": "bqhmSs1iZsb6vMqiiO2MAY1fNZyzspZs1bykOHiIan0C"
+    },
+    {
+      "name": "auxiliary_proto-descriptor-set.proto.bin",
+      "size": 293,
+      "hash": "ookaWPupZXpJwXFbGLHZ_2UWYH6F0w0SGQtJiMV2eCsC"
+    },
+    {
+      "name": "bootstrap.exe",
+      "size": 31764480,
+      "hash": "z9cHH-LdLX_JMQJOFNSgabvnSu55Gx0IZHMSVABtL0YC"
+    },
+    {
+      "name": "credshelper.exe",
+      "size": 11842560,
+      "hash": "5pZZ7h4pXwcOeyH567t7-IkyeAz0U36VFdETVxFGcLoC"
+    },
+    {
+      "name": "dumpstats.exe",
+      "size": 31077888,
+      "hash": "jJ8n8Byj_4JqD6p0Q02IiF0S8bMiZC7ZDWvySij4P10C"
+    },
+    {
+      "name": "logdump.exe",
+      "size": 30900224,
+      "hash": "cSxboW_IwS9lewrJZVTGND9qQ64GI4JGafXV4sz5eLIC"
+    },
+    {
+      "name": "metricsuploader.exe",
+      "size": 35693568,
+      "hash": "nhLXy6ZEzLaMnXfVJV1agMOhzkyYzh8_Sbvvjb2xFXsC"
+    },
+    {
+      "name": "reclientreport.exe",
+      "size": 31258112,
+      "hash": "uysdMnYT9r6N8ADVq4ve65D-cQvFm5lEI5KJMcAm9aAC"
+    },
+    {
+      "name": "remotetool.exe",
+      "size": 20500992,
+      "hash": "c68j3tUbBlEpIBYo8AnHOkrJBEY6O3X8MHhKbXn_2zYC"
+    },
+    {
+      "name": "reproxy.exe",
+      "size": 41937920,
+      "hash": "eXTP34Xl8hW-6c0_sor28TvRsNShRv7hbtrPzP7D4_0C"
+    },
+    {
+      "name": "reproxystatus.exe",
+      "size": 15633920,
+      "hash": "BWPDT4CAXJcgATMDWFo95p_ubwoWYcKPJiH_BW8jXz4C"
+    },
+    {
+      "name": "rewrapper.exe",
+      "size": 16486400,
+      "hash": "PvjNOOFlJ3RdvfKHhEpyi64sFRtLOfcXGDfH-13BtPEC"
+    },
+    {
+      "name": "rpl2cloudtrace.exe",
+      "size": 33066496,
+      "hash": "m0jkpqhNWSSxwVs0lzuYpm35jMdATJADOk7u7smSAG8C"
+    },
+    {
+      "name": "rpl2trace.exe",
+      "size": 30761984,
+      "hash": "5UlYGLp-45clMhN4inxGgGmoiGpbWIMoEiC8-fKxFYEC"
+    },
+    {
+      "name": "scandeps_server.exe",
+      "size": 12110848,
+      "hash": "cHpQYkoxJ27CsryU0j-Vq8rHEiS-W7IWUXD1_cUxA00C"
+    },
+    {
+      "name": "scandeps_server.pdb",
+      "size": 136912896,
+      "hash": "SQKKHQers76EjD5pxZADSVtRyEzrx83iBMZ-h6Zb40kC"
+    },
+    {
+      "name": "scandeps_server.sym",
+      "size": 15718522,
+      "hash": "WaAt7hF_mwaD0yjPMsEINax-_TquhpsZlJ7Fx_xTocUC"
+    },
+    {
+      "name": "version.txt",
+      "size": 23,
+      "hash": "BfaZJSpNWYgPbOGO4H2quXZRhvrPkh9qVPgI9wl892oC"
+    }
+  ]
+}
