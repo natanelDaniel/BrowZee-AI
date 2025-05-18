@@ -49,6 +49,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 class TaskRequest(BaseModel):
     task: str
@@ -60,9 +61,18 @@ class StatusRequest(BaseModel):
     question: Optional[str] = None
 
 
+class SearchRequest(BaseModel):
+    query: str
+
+
 class NeedAgent(TypedDict):
     is_need_agent: Annotated[bool, 'the task need an agent to complete']
     answer: Annotated[Optional[str], 'the answer of the model - to the question of the user - without mentioning the agent and if there is a need for an agent, for example - the user ask 1+1 and the model answer 2']
+
+@app.get("/status")
+async def status():
+    """Simple endpoint to check if the server is running"""
+    return {"status": "ok", "server": "BrowZee Agent", "version": "1.0"}
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -259,6 +269,47 @@ async def run_task(request: TaskRequest):
         await send_to_websockets(result)
         return result
 
+@app.post("/search-proxy")
+async def search_proxy(request: SearchRequest):
+    """Handle search queries from the Ask functionality"""
+    try:
+        print(f"Processing search query: {request.query}")
+        # Use the Claude model to answer the query
+        messages = [
+            SystemMessage(content="""You are BrowZee AI Assistant, a helpful and intelligent assistant. 
+            Provide clear, direct answers to questions. When appropriate, include suggestions for follow-up tasks that the user might want to perform.
+            Format your answers in clean, readable text without unnecessary markdown."""),
+            HumanMessage(content=request.query)
+        ]
+        
+        response = await model.ainvoke(messages)
+        answer_text = response.content
+        
+        # Extract potential tasks from the answer
+        tasks = None
+        if "you might want to" in answer_text.lower() or "you could" in answer_text.lower() or "consider" in answer_text.lower():
+            # Simple attempt to extract suggested tasks
+            try:
+                # Look for task suggestions at the end of the response
+                tasks_content = None
+                if "tasks you might consider:" in answer_text.lower():
+                    tasks_content = answer_text.split("tasks you might consider:", 1)[1].strip()
+                elif "suggested tasks:" in answer_text.lower():
+                    tasks_content = answer_text.split("suggested tasks:", 1)[1].strip()
+                elif "suggestions:" in answer_text.lower():
+                    tasks_content = answer_text.split("suggestions:", 1)[1].strip()
+                
+                if tasks_content:
+                    tasks = tasks_content
+                    # Remove the tasks section from the main answer
+                    answer_text = answer_text.replace(tasks_content, "").replace("Tasks you might consider:", "").replace("Suggested tasks:", "").replace("Suggestions:", "").strip()
+            except Exception as e:
+                print(f"Error extracting tasks: {e}")
+        
+        return {"answer": answer_text, "tasks": tasks}
+    except Exception as e:
+        print(f"Error in search proxy: {e}")
+        return {"error": str(e)}, 500
 
 # הרצה (אם תרצה)
 # uvicorn ai_server:app --host 0.0.0.0 --port 8000

@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 from langchain_community.utilities import SerpAPIWrapper
 from langchain.agents import initialize_agent, Tool
 from langchain_openai import ChatOpenAI
@@ -7,6 +8,7 @@ import re
 import datetime
 
 app = Flask(__name__)
+CORS(app)
 
 # Set your API keys
 os.environ["SERPAPI_API_KEY"] = "b6f655a92e5ddc1175d64f16fb60ffa41dbde1bb50b21c4c8c09ae34e43e83f5"
@@ -119,6 +121,15 @@ def parse_results(result):
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/ping", methods=["GET"])
+def ping():
+    """Simple endpoint to check if the service is running."""
+    return jsonify({
+        "status": "ok",
+        "message": "Search service is running",
+        "timestamp": datetime.datetime.now().isoformat()
+    })
 
 @app.route("/search", methods=["POST"])
 def search_query():

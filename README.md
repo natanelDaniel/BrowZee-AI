@@ -1,3 +1,60 @@
+# BrowZee AI
+
+This repository contains tools and approaches for integrating BrowZee with local backend servers while avoiding Content Security Policy (CSP) restrictions.
+
+## BrowZee Bridge (Recommended)
+
+The BrowZee Bridge is a separate local web server that acts as a proxy between your browser and BrowZee's backend services. This approach completely avoids CSP issues by serving a custom web interface that can freely communicate with the backend services.
+
+### Why the Bridge Approach?
+
+After trying multiple approaches to work around Chrome's strict CSP rules, we found that creating a separate bridge server is the most reliable solution. This approach:
+
+1. Doesn't require any browser extensions or modifications
+2. Works across all browsers (not just Chrome)
+3. Provides a clean, dedicated interface for BrowZee functionality
+4. Completely bypasses CSP restrictions
+
+### Getting Started with BrowZee Bridge
+
+1. Navigate to the `BrowZee-Bridge` directory
+2. Run `run_bridge.bat` (Windows) or `run_bridge.ps1` (PowerShell)
+3. Open your browser to [http://localhost:3000](http://localhost:3000)
+4. Use the web interface to interact with BrowZee's backend services
+
+For more details, see the [BrowZee Bridge README](BrowZee-Bridge/README.md).
+
+## Alternative Approaches (Not Recommended)
+
+We previously tried several other approaches that proved problematic:
+
+### Chrome Extension
+
+We attempted to create Chrome extensions (see `BrowZee-Extension` and `BrowZee-Extension-Proxy`) to bypass CSP restrictions. These approaches:
+
+- Required installing a Chrome extension
+- Were prone to breaking with Chrome updates
+- Still encountered CSP issues in some contexts
+- Required complex workarounds to function
+
+### Direct Integration
+
+We also tried direct integration approaches by modifying Chrome's New Tab Page or injecting scripts. These approaches:
+
+- Faced severe CSP restrictions
+- Required bypassing Chrome's security mechanisms
+- Were unreliable and inconsistent across Chrome versions
+
+## Requirements
+
+- Python 3.6 or later
+- BrowZee backend services:
+  - Search Agent running on port 5000
+  - Task Server running on port 8000
+
+## License
+
+© 2025 BrowZee. All rights reserved.
 
 ## 🧑‍💻 BrowZee AI - Developer Setup Guide
 
